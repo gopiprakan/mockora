@@ -26,6 +26,8 @@ class ResumeData(BaseModel):
     projects: List[ProjectItem] = Field(default_factory=list)
     internships: List[WorkItem] = Field(default_factory=list)
     certifications: List[str] = Field(default_factory=list)
+    key_focus_areas: List[str] = Field(default_factory=list)
+    suggested_opening_question: Optional[str] = None
     raw_text: Optional[str] = ""
 
 class ResumeAnalyzeRequest(BaseModel):

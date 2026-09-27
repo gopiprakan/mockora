@@ -15,7 +15,7 @@ class Settings:
     
     # AI API Key
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
     
     # Supabase Configuration
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")

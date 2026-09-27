@@ -2,6 +2,7 @@ import uuid
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from typing import Optional, Dict, Any, List
 from ..services.resume_parser import extract_text_from_pdf, parse_resume_text, get_sample_resume, SAMPLE_RESUMES
+from ..services.ai_service import analyze_resume_ai
 from ..services.database import save_resume, save_or_get_user
 from ..schemas.schemas import ResumeData, ResumeAnalyzeRequest
 
@@ -36,7 +37,7 @@ async def list_sample_resumes():
 
 @router.post("/upload")
 async def upload_resume(file: UploadFile = File(...)):
-    """Uploads a PDF resume and parses it into structured data."""
+    """Uploads a PDF resume and parses it into structured data using Gemini AI."""
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported currently.")
     
@@ -48,7 +49,12 @@ async def upload_resume(file: UploadFile = File(...)):
         parsed = get_sample_resume("traffic_ai")
         parsed["candidate_name"] = file.filename.replace(".pdf", "").title()
     else:
-        parsed = parse_resume_text(raw_text)
+        # Prioritize deep Gemini analysis
+        ai_parsed = await analyze_resume_ai(raw_text)
+        if ai_parsed:
+            parsed = ai_parsed
+        else:
+            parsed = parse_resume_text(raw_text)
         
     return {
         "status": "success",
@@ -58,11 +64,15 @@ async def upload_resume(file: UploadFile = File(...)):
 
 @router.post("/analyze")
 async def analyze_resume(request: ResumeAnalyzeRequest):
-    """Analyzes provided resume text or a sample resume."""
+    """Analyzes provided resume text or a sample resume using Gemini AI."""
     if request.sample_id and request.sample_id in SAMPLE_RESUMES:
         parsed = get_sample_resume(request.sample_id)
     elif request.text:
-        parsed = parse_resume_text(request.text)
+        ai_parsed = await analyze_resume_ai(request.text)
+        if ai_parsed:
+            parsed = ai_parsed
+        else:
+            parsed = parse_resume_text(request.text)
     else:
         parsed = get_sample_resume("traffic_ai")
         

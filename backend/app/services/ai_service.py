@@ -7,12 +7,16 @@ from ..config import settings
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models"
 
 async def call_gemini(prompt: str, system_instruction: str = "") -> Optional[str]:
-    """Calls Gemini REST API if GEMINI_API_KEY is configured."""
+    """Calls Gemini REST API with automated multi-model failover."""
     if not settings.GEMINI_API_KEY:
         return None
     
-    url = f"{GEMINI_ENDPOINT}/{settings.GEMINI_MODEL}:generateContent?key={settings.GEMINI_API_KEY}"
-    
+    # Priority ordered list of models to try
+    candidate_models = []
+    for m in [settings.GEMINI_MODEL, "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-3.8-flash"]:
+        if m and m not in candidate_models:
+            candidate_models.append(m)
+            
     payload = {
         "contents": [
             {
@@ -32,20 +36,91 @@ async def call_gemini(prompt: str, system_instruction: str = "") -> Optional[str
             "parts": [{"text": system_instruction}]
         }
         
-    try:
-        async with httpx.AsyncClient(timeout=25.0) as client:
-            resp = await client.post(url, json=payload)
-            if resp.status_code == 200:
-                data = resp.json()
-                candidates = data.get("candidates", [])
-                if candidates:
-                    content_parts = candidates[0].get("content", {}).get("parts", [])
-                    if content_parts:
-                        return content_parts[0].get("text", "")
-            else:
-                print(f"Gemini API returned status {resp.status_code}: {resp.text}")
-    except Exception as e:
-        print(f"Gemini API call failed: {e}")
+    for model in candidate_models:
+        url = f"{GEMINI_ENDPOINT}/{model}:generateContent?key={settings.GEMINI_API_KEY}"
+        try:
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                resp = await client.post(url, json=payload)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    candidates = data.get("candidates", [])
+                    if candidates:
+                        content_parts = candidates[0].get("content", {}).get("parts", [])
+                        if content_parts:
+                            return content_parts[0].get("text", "")
+                elif resp.status_code in [404, 503, 429]:
+                    # Model unavailable, overloaded, or rate limited -> try fallback model
+                    continue
+                else:
+                    print(f"Gemini API ({model}) returned {resp.status_code}: {resp.text[:120]}")
+        except Exception as e:
+            print(f"Gemini call to {model} failed: {e}")
+            continue
+            
+    return None
+
+
+async def analyze_resume_ai(raw_text: str) -> Optional[Dict[str, Any]]:
+    """Uses Gemini to thoroughly parse, analyze, and extract key interview focus areas from resume text."""
+    if not settings.GEMINI_API_KEY or not raw_text.strip():
+        return None
+        
+    prompt = f"""
+You are Mockora, an expert AI Technical Interviewer & Engineering Recruiter.
+Analyze the following candidate resume text. Extract their profile and synthesize key interview focus areas so we can conduct an adaptive, highly relevant mock interview.
+
+Resume Text:
+{raw_text[:6000]}
+
+TASK:
+Extract and return ONLY a valid JSON object matching this exact structure:
+{{
+  "candidate_name": "Candidate Full Name or Student Candidate",
+  "candidate_email": "candidate email or ''",
+  "skills": ["Language/Framework 1", "Database/Tool 2", ...],
+  "education": [
+    {{
+      "degree": "Degree name",
+      "institution": "University / College",
+      "year": "Graduation year",
+      "score": "CGPA / GPA / Honors"
+    }}
+  ],
+  "projects": [
+    {{
+      "name": "Project Name",
+      "technologies": ["Tech 1", "Tech 2"],
+      "description": "Short description of what the project does and its technical architecture"
+    }}
+  ],
+  "internships": [
+    {{
+      "role": "Role / Title",
+      "company": "Company Name",
+      "duration": "Duration (e.g. Jun 2023 - Aug 2023)",
+      "description": "Key achievements and responsibilities"
+    }}
+  ],
+  "certifications": ["Certification 1", ...],
+  "key_focus_areas": [
+    "Specific technical strength or complex component to question during the interview",
+    "Another notable architectural trade-off or challenge in their background"
+  ],
+  "suggested_opening_question": "A welcoming, natural question directly mentioning a specific project from their resume."
+}}
+"""
+    response_text = await call_gemini(prompt)
+    if response_text:
+        try:
+            clean_json = re.sub(r'```(?:json)?\n|\n```', '', response_text).strip()
+            match = re.search(r'\{.*\}', clean_json, re.DOTALL)
+            if match:
+                clean_json = match.group(0)
+            parsed = json.loads(clean_json)
+            parsed["raw_text"] = raw_text[:3000]
+            return parsed
+        except Exception as e:
+            print(f"Error parsing Gemini resume analysis JSON: {e}")
     return None
 
 
@@ -62,6 +137,9 @@ async def generate_adaptive_question(
     
     skills = resume.get("skills", [])
     projects = resume.get("projects", [])
+    candidate_name = resume.get("candidate_name") or interview_session.get("candidate_name") or "Candidate"
+    key_focus_areas = resume.get("key_focus_areas", [])
+    suggested_opening = resume.get("suggested_opening_question")
     primary_project = projects[0]["name"] if projects else "your recent software project"
     primary_project_tech = ", ".join(projects[0].get("technologies", [])) if projects else "modern technologies"
     
@@ -73,29 +151,33 @@ async def generate_adaptive_question(
         ])
         
         prompt = f"""
-You are Mockora, an intelligent, friendly humanoid AI interviewer conducting a {interview_type} mock interview for a {difficulty} {role}.
-Resume Context:
-- Skills: {', '.join(skills)}
+You are Mockora, an intelligent, friendly humanoid AI interviewer conducting an interactive {interview_type} mock interview for a {difficulty} {role}.
+
+Candidate Profile from Resume:
+- Candidate Name: {candidate_name}
+- Technical Skills: {', '.join(skills) if skills else 'General Software Engineering'}
 - Projects: {json.dumps(projects)}
+- Key Focus Areas from Resume: {json.dumps(key_focus_areas)}
 - Education: {json.dumps(resume.get('education', []))}
+{"- Suggested Opening Direction: " + suggested_opening if suggested_opening and question_number == 1 else ""}
 
 Interview Progress:
-Question Number: {question_number}
+Current Question Number: {question_number}
 Previous Q&A History:
 {history_text or 'No previous questions yet (Starting interview)'}
 
 TASK:
 Generate question #{question_number}.
 Guidelines:
-- Question 1 should warmly welcome the student and ask about a prominent project from their resume (e.g. "{primary_project}").
-- Follow-up questions must NOT be generic or predetermined. Deep-dive into technical details they mentioned in their previous answer.
-- Progressively challenge their system design, trade-offs, edge cases, failure handling, or fundamental concepts.
-- Keep tone professional, encouraging, and clear.
+- Question 1: Greet {candidate_name} warmly and ask about a specific technical project or accomplishment from their resume (e.g. "{primary_project}").
+- Follow-up Questions (Question 2+): Be truly interactive! Directly probe specific details, trade-offs, technologies, or design choices they mentioned in their previous response. DO NOT ask generic questions.
+- Challenge their architecture decisions, concurrency handling, database queries, edge cases, failure scenarios, or debugging methodologies.
+- Keep the tone encouraging, conversational, professional, and clear.
 - Return ONLY valid JSON in this exact structure:
 {{
   "question_text": "The question to speak aloud to the candidate",
   "category": "{interview_type}",
-  "context_note": "Short rationale for why this question is being asked based on resume/previous response"
+  "context_note": "Short rationale explaining why this question was chosen based on their resume and previous answer"
 }}
 """
         response_text = await call_gemini(prompt)
@@ -103,6 +185,9 @@ Guidelines:
             try:
                 # Clean markdown json code fences if any
                 clean_json = re.sub(r'```(?:json)?\n|\n```', '', response_text).strip()
+                match = re.search(r'\{.*\}', clean_json, re.DOTALL)
+                if match:
+                    clean_json = match.group(0)
                 parsed = json.loads(clean_json)
                 return {
                     "question_text": parsed.get("question_text"),
@@ -231,6 +316,9 @@ Return ONLY valid JSON in this exact structure:
         if response_text:
             try:
                 clean_json = re.sub(r'```(?:json)?\n|\n```', '', response_text).strip()
+                match = re.search(r'\{.*\}', clean_json, re.DOTALL)
+                if match:
+                    clean_json = match.group(0)
                 parsed = json.loads(clean_json)
                 return {
                     "technical_score": float(parsed.get("technical_score", 8.0)),
