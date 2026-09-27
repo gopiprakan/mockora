@@ -46,7 +46,7 @@ export default function Navbar({ currentView, onNavigate }) {
               WebkitTextFillColor: 'transparent',
               textTransform: 'uppercase'
             }}>
-              INTERVEXA
+              MOCKORA
             </div>
             <div style={{ fontSize: '10px', color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '-3px' }}>
               AI Interview Coach

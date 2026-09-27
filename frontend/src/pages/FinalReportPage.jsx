@@ -79,7 +79,7 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
             letterSpacing: '0.04em',
             textTransform: 'uppercase'
           }}>
-            INTERVEXA INTERVIEW REPORT
+            MOCKORA INTERVIEW REPORT
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '4px' }}>
             Candidate: <strong style={{ color: '#f8fafc' }}>{report?.candidate_name}</strong> &nbsp;&bull;&nbsp;

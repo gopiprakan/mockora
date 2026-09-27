@@ -38,7 +38,7 @@ export default function LandingPage({ onStartInterview }) {
               WebkitTextFillColor: 'transparent',
               display: 'block'
             }}>
-              INTERVEXA
+              MOCKORA
             </span>
             <span style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', color: '#cbd5e1', fontWeight: '500' }}>
               Your AI Interview Coach
@@ -119,7 +119,7 @@ export default function LandingPage({ onStartInterview }) {
 
             <div style={{ marginTop: '24px' }}>
               <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>
-                Try Intervexa Robot States
+                Try Mockora Robot States
               </div>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                 {['idle', 'listening', 'thinking', 'speaking'].map(s => (
@@ -181,7 +181,7 @@ export default function LandingPage({ onStartInterview }) {
               Resume-Based Questions
             </h3>
             <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: '1.6' }}>
-              Intervexa analyzes your projects, technologies, internships, and certifications. Questions adapt dynamically to your stated tech stack.
+              Mockora analyzes your projects, technologies, internships, and certifications. Questions adapt dynamically to your stated tech stack.
             </p>
           </div>
 
@@ -273,7 +273,7 @@ export default function LandingPage({ onStartInterview }) {
             </button>
 
             <h2 style={{ fontSize: '24px', color: '#f8fafc', marginBottom: '8px' }}>
-              How Intervexa Works
+              How Mockora Works
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '24px' }}>
               A 4-step streamlined journey to landing your dream software role.
@@ -295,7 +295,7 @@ export default function LandingPage({ onStartInterview }) {
                 }}>1</div>
                 <div>
                   <h4 style={{ color: '#f8fafc', fontSize: '16px', marginBottom: '4px' }}>Upload Your Resume</h4>
-                  <p style={{ color: '#94a3b8', fontSize: '13px' }}>Upload your PDF or select from quick pre-built samples. Intervexa parses your skills, projects, and coursework.</p>
+                  <p style={{ color: '#94a3b8', fontSize: '13px' }}>Upload your PDF or select from quick pre-built samples. Mockora parses your skills, projects, and coursework.</p>
                 </div>
               </div>
 

@@ -1,5 +1,5 @@
 /**
- * Intervexa API Client
+ * Mockora API Client
  * Secure communication layer to Python FastAPI backend
  */
 

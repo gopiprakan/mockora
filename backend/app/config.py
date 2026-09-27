@@ -10,7 +10,7 @@ load_dotenv(backend_dir / ".env")
 load_dotenv(root_dir / ".env")
 
 class Settings:
-    PROJECT_NAME: str = "Intervexa API"
+    PROJECT_NAME: str = "Mockora API"
     VERSION: str = "1.0.0"
     
     # AI API Key
@@ -24,8 +24,8 @@ class Settings:
     # Email Configuration
     EMAIL_SERVICE: str = os.getenv("EMAIL_SERVICE", "smtp")
     EMAIL_API_KEY: str = os.getenv("EMAIL_API_KEY", "")
-    EMAIL_FROM: str = os.getenv("EMAIL_FROM", "intervexa@mockora.ai")
-    EMAIL_FROM_NAME: str = os.getenv("EMAIL_FROM_NAME", "Intervexa AI Coach")
+    EMAIL_FROM: str = os.getenv("EMAIL_FROM", "hello@mockora.ai")
+    EMAIL_FROM_NAME: str = os.getenv("EMAIL_FROM_NAME", "Mockora AI Coach")
     SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
     SMTP_USER: str = os.getenv("SMTP_USER", "")

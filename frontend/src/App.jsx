@@ -60,7 +60,7 @@ export default function App() {
         id: 'q_1',
         interview_id: fallbackSession.id,
         question_number: 1,
-        question_text: `Welcome to your Intervexa mock interview! To get started, I was reviewing your resume and noticed your project '${primaryProject}'. Could you walk me through the problem it solves and your core technical architecture?`,
+        question_text: `Welcome to your Mockora mock interview! To get started, I was reviewing your resume and noticed your project '${primaryProject}'. Could you walk me through the problem it solves and your core technical architecture?`,
         category: setupConfig.interviewType || 'Technical',
         context_note: `Exploration of resume project: ${primaryProject}`
       };
@@ -141,7 +141,7 @@ export default function App() {
         fontSize: '13px'
       }}>
         <div className="container">
-          <p>&copy; {new Date().getFullYear()} Intervexa AI Interview Coach. Built for college students & freshers.</p>
+          <p>&copy; {new Date().getFullYear()} Mockora AI Interview Coach. Built for college students & freshers.</p>
         </div>
       </footer>
     </div>

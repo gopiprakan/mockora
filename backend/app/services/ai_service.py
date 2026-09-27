@@ -73,7 +73,7 @@ async def generate_adaptive_question(
         ])
         
         prompt = f"""
-You are Intervexa, an intelligent, friendly humanoid AI interviewer conducting a {interview_type} mock interview for a {difficulty} {role}.
+You are Mockora, an intelligent, friendly humanoid AI interviewer conducting a {interview_type} mock interview for a {difficulty} {role}.
 Resume Context:
 - Skills: {', '.join(skills)}
 - Projects: {json.dumps(projects)}
@@ -118,10 +118,10 @@ Guidelines:
 
     if question_number == 1:
         if projects:
-            q_text = f"Welcome to your Intervexa mock interview! To get started, I was reviewing your resume and noticed your project '{projects[0]['name']}'. Could you walk me through the problem it solves and your core technical architecture?"
+            q_text = f"Welcome to your Mockora mock interview! To get started, I was reviewing your resume and noticed your project '{projects[0]['name']}'. Could you walk me through the problem it solves and your core technical architecture?"
             note = f"Initial deep-dive into resume project: {projects[0]['name']}"
         else:
-            q_text = f"Welcome to Intervexa! To kick off our session for the {role} position, could you introduce yourself and highlight a challenging technical project or problem you've worked on recently?"
+            q_text = f"Welcome to Mockora! To kick off our session for the {role} position, could you introduce yourself and highlight a challenging technical project or problem you've worked on recently?"
             note = f"Icebreaker and core project overview for {role}"
     
     elif question_number == 2:
@@ -197,7 +197,7 @@ async def evaluate_answer(
     # Try calling Gemini if available
     if settings.GEMINI_API_KEY:
         prompt = f"""
-You are Intervexa, an expert AI technical interviewer.
+You are Mockora, an expert AI technical interviewer.
 Evaluate the candidate's answer for the following question for a {role} position.
 
 Question: "{question_text}"

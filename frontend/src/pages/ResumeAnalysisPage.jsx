@@ -78,7 +78,7 @@ export default function ResumeAnalysisPage({ setupConfig, onStartLiveInterview }
                 Analyzing your resume...
               </h1>
               <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '16px' }}>
-                Intervexa is parsing your projects, core technologies, and domain experience.
+                Mockora is parsing your projects, core technologies, and domain experience.
               </p>
 
               {/* Progress Bar */}
@@ -109,7 +109,7 @@ export default function ResumeAnalysisPage({ setupConfig, onStartLiveInterview }
                 </span>
               </div>
               <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '20px' }}>
-                Intervexa has calibrated questions tailored to your resume for the <strong style={{ color: '#38bdf8' }}>{setupConfig.role}</strong> role.
+                Mockora has calibrated questions tailored to your resume for the <strong style={{ color: '#38bdf8' }}>{setupConfig.role}</strong> role.
               </p>
 
               <button

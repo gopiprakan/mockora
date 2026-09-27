@@ -5,7 +5,7 @@ from typing import Dict, Any
 from ..config import settings
 
 def generate_email_html(report: Dict[str, Any]) -> str:
-    """Generates an HTML email report with dark futuristic Intervexa branding."""
+    """Generates an HTML email report with dark futuristic Mockora branding."""
     name = report.get("candidate_name", "Student")
     role = report.get("role", "Software Developer")
     score = report.get("overall_score", 78)
@@ -27,7 +27,7 @@ def generate_email_html(report: Dict[str, Any]) -> str:
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Your Intervexa AI Mock Interview Report</title>
+  <title>Your Mockora AI Mock Interview Report</title>
 </head>
 <body style="margin:0; padding:0; background-color:#090d16; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:#e2e8f0;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#090d16; padding: 30px 10px;">
@@ -37,7 +37,7 @@ def generate_email_html(report: Dict[str, Any]) -> str:
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #091a2f 0%, #0d2547 100%); padding: 30px; text-align: center; border-bottom: 1px solid #1e3a5f;">
-              <h1 style="margin:0; color:#38bdf8; font-size: 26px; letter-spacing: 2px; text-transform: uppercase;">INTERVEXA</h1>
+              <h1 style="margin:0; color:#38bdf8; font-size: 26px; letter-spacing: 2px; text-transform: uppercase;">MOCKORA</h1>
               <p style="margin:5px 0 0 0; color:#94a3b8; font-size: 14px;">Your AI Interview Coach</p>
             </td>
           </tr>
@@ -104,7 +104,7 @@ def generate_email_html(report: Dict[str, Any]) -> str:
               </table>
 
               <p style="font-size: 11px; color: #64748b; text-align: center; margin-top: 25px; line-height: 1.4;">
-                *Note: Intervexa Practice Scores are AI-generated simulation metrics designed to help you prepare and boost your interview confidence.
+                *Note: Mockora Practice Scores are AI-generated simulation metrics designed to help you prepare and boost your interview confidence.
               </p>
             </td>
           </tr>
@@ -112,7 +112,7 @@ def generate_email_html(report: Dict[str, Any]) -> str:
           <!-- Footer -->
           <tr>
             <td style="background-color:#0b1120; padding: 20px; text-align: center; border-top: 1px solid #1e293b; color:#64748b; font-size: 12px;">
-              &copy; 2026 Intervexa AI. Built for college students & freshers.
+              &copy; 2026 Mockora AI. Built for college students & freshers.
             </td>
           </tr>
         </table>
@@ -125,7 +125,7 @@ def generate_email_html(report: Dict[str, Any]) -> str:
 
 def send_interview_report_email(report: Dict[str, Any], recipient_email: str) -> Dict[str, Any]:
     """Sends the interview report via SMTP if configured, or returns simulated success."""
-    subject = "Your Intervexa AI Mock Interview Report"
+    subject = "Your Mockora AI Mock Interview Report"
     html_content = generate_email_html(report)
     
     # If SMTP is configured
@@ -160,7 +160,7 @@ def send_interview_report_email(report: Dict[str, Any], recipient_email: str) ->
             }
     else:
         # Development / preview simulation mode
-        print(f"[Intervexa Email Service] Email simulated for {recipient_email} (Subject: {subject})")
+        print(f"[Mockora Email Service] Email simulated for {recipient_email} (Subject: {subject})")
         return {
             "status": "success",
             "message": f"Report successfully sent to {recipient_email} (Preview ready in application)",

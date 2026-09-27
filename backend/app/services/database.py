@@ -6,7 +6,13 @@ from typing import Optional, Dict, Any, List
 from pathlib import Path
 from ..config import settings
 
-DB_FILE = settings.DATA_DIR / "intervexa.db"
+DB_FILE = settings.DATA_DIR / "mockora.db"
+# If an older intervexa.db exists and mockora.db does not, migrate it seamlessly
+if not DB_FILE.exists() and (settings.DATA_DIR / "intervexa.db").exists():
+    try:
+        (settings.DATA_DIR / "intervexa.db").rename(DB_FILE)
+    except Exception:
+        pass
 
 def get_db():
     conn = sqlite3.connect(DB_FILE)
@@ -14,7 +20,7 @@ def get_db():
     return conn
 
 def init_db():
-    """Initializes tables for Intervexa based on the requested schema."""
+    """Initializes tables for Mockora based on the requested schema."""
     conn = get_db()
     cursor = conn.cursor()
     

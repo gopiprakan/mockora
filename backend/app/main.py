@@ -6,7 +6,7 @@ from .routers import resume, interview, report
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Intervexa AI Mock Interview Assistant API"
+    description="Mockora AI Mock Interview Assistant API"
 )
 
 # CORS setup
@@ -27,7 +27,7 @@ app.include_router(report.router)
 async def health_check():
     return {
         "status": "online",
-        "app": "Intervexa AI Interview Assistant",
+        "app": "Mockora AI Interview Assistant",
         "gemini_active": bool(settings.GEMINI_API_KEY),
         "version": settings.VERSION
     }
