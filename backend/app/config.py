@@ -47,5 +47,14 @@ class Settings:
     DATA_DIR: Path = backend_dir / "data"
 
 settings = Settings()
-settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-settings.DATA_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    settings.DATA_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    # Serverless / read-only filesystem environment (e.g. Vercel)
+    import tempfile
+    tmp_base = Path(tempfile.gettempdir()) / "mockora"
+    settings.UPLOAD_DIR = tmp_base / "uploads"
+    settings.DATA_DIR = tmp_base / "data"
+    settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    settings.DATA_DIR.mkdir(parents=True, exist_ok=True)
