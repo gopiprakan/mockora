@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import RobotAvatar from '../components/RobotAvatar';
+import { INTERVIEWER_PERSONAS } from '../components/InterviewerFace';
 import { Sparkles, Code2, FolderGit2, GraduationCap, Briefcase, Award, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { analyzeResume } from '../services/api';
 
