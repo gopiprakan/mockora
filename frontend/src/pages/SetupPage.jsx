@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, ArrowRight, Sparkles, User, Mail, Briefcase, Award } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle2, AlertCircle, ArrowRight, Sparkles, User, Mail, Briefcase, Award, Video } from 'lucide-react';
 import { uploadResumePdf, fetchSampleResumes } from '../services/api';
+import { INTERVIEWER_PERSONAS } from '../components/InterviewerFace';
 
 const DEFAULT_ROLES = [
   "Software Developer",
@@ -20,6 +21,7 @@ export default function SetupPage({ onProceedToAnalysis }) {
   const [interviewType, setInterviewType] = useState('Technical');
   const [difficulty, setDifficulty] = useState('Intermediate');
   const [durationMinutes, setDurationMinutes] = useState(15);
+  const [interviewerPersona, setInterviewerPersona] = useState('sarah');
   
   // Resume state
   const [uploadedFile, setUploadedFile] = useState(null);
