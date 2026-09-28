@@ -131,6 +131,7 @@ export default function SetupPage({ onProceedToAnalysis }) {
       interviewType,
       difficulty,
       durationMinutes,
+      interviewerPersona,
       resumeData: parsedResumeData,
       sampleId: selectedSampleId
     });
@@ -361,6 +362,97 @@ export default function SetupPage({ onProceedToAnalysis }) {
               <option value={30}>30 Minutes</option>
               <option value={3}>3 Minutes (Quick Test Demo)</option>
             </select>
+          </div>
+        </div>
+
+        {/* Section 4: Choose Interviewer Face */}
+        <div style={{ marginBottom: '30px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+            <Video size={16} color="#00f0ff" />
+            <label style={{ fontSize: '14px', fontWeight: '700', color: '#f8fafc' }}>
+              Choose AI Interviewer Persona & Face
+            </label>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '12px'
+          }}>
+            {INTERVIEWER_PERSONAS.map((persona) => {
+              const isSelected = persona.id === interviewerPersona;
+              return (
+                <div
+                  key={persona.id}
+                  onClick={() => setInterviewerPersona(persona.id)}
+                  style={{
+                    padding: '12px 10px',
+                    borderRadius: '10px',
+                    background: isSelected ? 'rgba(0, 240, 255, 0.12)' : 'rgba(10, 16, 30, 0.6)',
+                    border: isSelected ? '2px solid #00f0ff' : '1px solid rgba(56, 189, 248, 0.15)',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    boxShadow: isSelected ? '0 0 15px rgba(0, 240, 255, 0.2)' : 'none'
+                  }}
+                >
+                  <div style={{ width: '56px', height: '56px', margin: '0 auto 8px', position: 'relative' }}>
+                    {persona.image ? (
+                      <img
+                        src={persona.image}
+                        alt={persona.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          border: isSelected ? '2px solid #00f0ff' : '1px solid #334155'
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '50%',
+                        background: '#090d16',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: isSelected ? '2px solid #00f0ff' : '1px solid #334155'
+                      }}>
+                        <Sparkles size={24} color="#00f0ff" />
+                      </div>
+                    )}
+                    {isSelected && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '-2px',
+                        right: '-2px',
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        background: '#00f0ff',
+                        color: '#000',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px',
+                        fontWeight: '900'
+                      }}>
+                        ✓
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: isSelected ? '#00f0ff' : '#f8fafc' }}>
+                    {persona.name}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', lineHeight: '1.2' }}>
+                    {persona.tag}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
