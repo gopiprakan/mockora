@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import RobotAvatar from '../components/RobotAvatar';
+import InterviewerFace from '../components/InterviewerFace';
 import CountdownTimer from '../components/CountdownTimer';
 import WebcamMonitor from '../components/WebcamMonitor';
 import { Mic, MicOff, Volume2, Send, Edit3, Check, AlertCircle, Sparkles, ChevronRight, LogOut } from 'lucide-react';
@@ -256,28 +256,13 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
         gap: '28px',
         alignItems: 'start'
       }}>
-        {/* LEFT COLUMN: Animated Robot & Communication Signals */}
+        {/* LEFT COLUMN: Animated Interviewer Face & Candidate Webcam */}
         <div>
-          <div className="cyber-card" style={{
-            padding: '30px 20px',
-            textAlign: 'center',
-            background: 'radial-gradient(circle at 50% 30%, rgba(13, 21, 39, 0.95) 0%, rgba(6, 9, 19, 0.95) 100%)',
-            border: '1px solid rgba(0, 240, 255, 0.3)'
-          }}>
-            <RobotAvatar status={robotStatus} size={260} showStatusBadge={true} />
-
-            <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-              <button
-                onClick={handleReplayQuestion}
-                className="btn-secondary"
-                style={{ padding: '6px 14px', fontSize: '12px' }}
-                title="Re-play question voice"
-              >
-                <Volume2 size={14} color="#00f0ff" />
-                Repeat Question
-              </button>
-            </div>
-          </div>
+          <InterviewerFace
+            status={robotStatus}
+            selectedInterviewerId={sessionData?.interviewer_persona || 'sarah'}
+            onReplayAudio={handleReplayQuestion}
+          />
 
           {/* Webcam & Communication Observer */}
           <WebcamMonitor
