@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, CameraOff, Eye, AlertCircle, Sparkles, Activity } from 'lucide-react';
+import { Camera, CameraOff, Eye, AlertCircle, Sparkles, Activity, User, Mic } from 'lucide-react';
 
 export default function WebcamMonitor({
   isAnswering = false,
@@ -39,7 +39,7 @@ export default function WebcamMonitor({
       timerRef.current = setInterval(() => {
         setSpeakingDuration(prev => prev + 1);
 
-        // Check if there hasn't been new words in last 4 seconds
+        // Check if there hasn't been new words in last 4.5 seconds
         const gap = (Date.now() - lastSpeechTimeRef.current) / 1000;
         if (gap > 4.5) {
           setLongPauses(prev => prev + 1);
@@ -58,7 +58,7 @@ export default function WebcamMonitor({
     lastSpeechTimeRef.current = Date.now();
   }, [transcript]);
 
-  // 3. Request Camera Stream
+  // 3. Request / Toggle Camera Stream
   const toggleCamera = async () => {
     if (cameraActive) {
       if (streamRef.current) {
@@ -71,7 +71,7 @@ export default function WebcamMonitor({
     try {
       setCameraRequested(true);
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 320 }, height: { ideal: 240 } },
+        video: { width: { ideal: 480 }, height: { ideal: 360 } },
         audio: false
       });
       streamRef.current = stream;
@@ -84,6 +84,7 @@ export default function WebcamMonitor({
     } catch (err) {
       console.warn('Camera permission denied or camera not found:', err);
       setCameraActive(false);
+      alert('Could not access camera. Please check your browser webcam permissions.');
     }
   };
 
@@ -98,7 +99,7 @@ export default function WebcamMonitor({
         face_detected: faceDetected
       });
     }
-  }, [cameraEngagement, longPauses, fillerCount, speakingDuration, faceDetected]);
+  }, [cameraEngagement, longPauses, fillerCount, speakingDuration, faceDetected, onObservationsUpdate]);
 
   // Clean up stream on unmount
   useEffect(() => {
@@ -113,81 +114,137 @@ export default function WebcamMonitor({
     <div className="cyber-card" style={{ padding: '16px', background: 'rgba(10, 16, 30, 0.85)', marginTop: '16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Activity size={18} color="#00f0ff" />
-          <span style={{ fontSize: '13px', fontWeight: '600', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#94a3b8' }}>
-            Communication Signals
+          <Activity size={17} color="#00f0ff" />
+          <span style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#94a3b8' }}>
+            Candidate Video & Signals
           </span>
         </div>
 
         <button
           onClick={toggleCamera}
           className="btn-secondary"
-          style={{ padding: '5px 12px', fontSize: '12px', borderRadius: '6px' }}
-          title={cameraActive ? 'Disable webcam' : 'Enable webcam for camera engagement observation'}
+          style={{
+            padding: '5px 12px',
+            fontSize: '11px',
+            borderRadius: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            borderColor: cameraActive ? 'rgba(244, 63, 94, 0.4)' : 'rgba(0, 240, 255, 0.4)'
+          }}
+          title={cameraActive ? 'Turn off candidate camera' : 'Enable candidate camera for visual engagement feedback'}
         >
-          {cameraActive ? <CameraOff size={14} color="#f43f5e" /> : <Camera size={14} color="#00f0ff" />}
-          {cameraActive ? 'Camera Off' : 'Enable Camera'}
+          {cameraActive ? <CameraOff size={13} color="#f43f5e" /> : <Camera size={13} color="#00f0ff" />}
+          <span>{cameraActive ? 'Turn Camera Off' : 'Enable Camera'}</span>
         </button>
       </div>
 
-      {/* Video Feed preview if enabled */}
-      {cameraActive && (
-        <div style={{ position: 'relative', width: '100%', height: '140px', borderRadius: '8px', overflow: 'hidden', background: '#020617', marginBottom: '12px', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
-          />
+      {/* Video Feed Preview Frame (Always structured with video or preview avatar) */}
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '150px',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        background: '#020617',
+        marginBottom: '12px',
+        border: cameraActive ? '1px solid rgba(0, 240, 255, 0.4)' : '1px dashed rgba(56, 189, 248, 0.25)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        {cameraActive ? (
+          <>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
+            />
 
-          {/* HUD Overlay */}
-          <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', gap: '6px' }}>
-            <span className="badge-cyber" style={{ fontSize: '10px', padding: '2px 8px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f0ff' }} />
-              Face In Frame
-            </span>
+            {/* Live Camera HUD Overlay */}
+            <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', gap: '6px' }}>
+              <span className="badge-cyber" style={{ fontSize: '10px', padding: '2px 8px', background: 'rgba(2, 6, 23, 0.85)' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f0ff', display: 'inline-block' }} />
+                Face In Frame
+              </span>
+            </div>
+
+            <div style={{ position: 'absolute', bottom: '8px', right: '8px' }}>
+              <span className="badge-green" style={{ fontSize: '10px', padding: '2px 8px', background: 'rgba(2, 6, 23, 0.85)' }}>
+                Engagement: {cameraEngagement}
+              </span>
+            </div>
+
+            {/* Corner Targeting Reticle */}
+            <div style={{ position: 'absolute', top: '6px', left: '6px', width: '8px', height: '8px', borderTop: '2px solid #00f0ff', borderLeft: '2px solid #00f0ff' }} />
+            <div style={{ position: 'absolute', top: '6px', right: '6px', width: '8px', height: '8px', borderTop: '2px solid #00f0ff', borderRight: '2px solid #00f0ff' }} />
+            <div style={{ position: 'absolute', bottom: '6px', left: '6px', width: '8px', height: '8px', borderBottom: '2px solid #00f0ff', borderLeft: '2px solid #00f0ff' }} />
+            <div style={{ position: 'absolute', bottom: '6px', right: '6px', width: '8px', height: '8px', borderBottom: '2px solid #00f0ff', borderRight: '2px solid #00f0ff' }} />
+          </>
+        ) : (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '16px',
+            textAlign: 'center',
+            color: '#64748b'
+          }}>
+            <div style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              background: 'rgba(15, 23, 42, 0.8)',
+              border: '1px solid rgba(56, 189, 248, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <User size={22} color="#94a3b8" />
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', fontWeight: '600', color: '#94a3b8' }}>
+                Your Video Feed is Off
+              </div>
+              <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>
+                Click <span style={{ color: '#00f0ff' }}>"Enable Camera"</span> above to practice with eye contact tracking
+              </div>
+            </div>
           </div>
-
-          <div style={{ position: 'absolute', bottom: '8px', right: '8px' }}>
-            <span className="badge-green" style={{ fontSize: '10px', padding: '2px 8px' }}>
-              Engagement: {cameraEngagement}
-            </span>
-          </div>
-
-          {/* Cyber Corner Grid Marks */}
-          <div style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', borderTop: '2px solid #00f0ff', borderRight: '2px solid #00f0ff' }} />
-          <div style={{ position: 'absolute', bottom: '4px', left: '4px', width: '8px', height: '8px', borderBottom: '2px solid #00f0ff', borderLeft: '2px solid #00f0ff' }} />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Metrics Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', textAlign: 'center' }}>
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
+        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px 6px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
           <div style={{ fontSize: '11px', color: '#64748b' }}>Camera Gaze</div>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: '#38bdf8', marginTop: '2px' }}>
+          <div style={{ fontSize: '13px', fontWeight: '700', color: '#38bdf8', marginTop: '2px' }}>
             {cameraActive ? cameraEngagement : 'Audio Mode'}
           </div>
         </div>
 
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
+        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px 6px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
           <div style={{ fontSize: '11px', color: '#64748b' }}>Filler Words</div>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: fillerCount > 5 ? '#f59e0b' : '#10b981', marginTop: '2px' }}>
+          <div style={{ fontSize: '13px', fontWeight: '700', color: fillerCount > 5 ? '#f59e0b' : '#10b981', marginTop: '2px' }}>
             {fillerCount}
           </div>
         </div>
 
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
+        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px 6px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
           <div style={{ fontSize: '11px', color: '#64748b' }}>Long Pauses</div>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: longPauses > 3 ? '#f59e0b' : '#38bdf8', marginTop: '2px' }}>
+          <div style={{ fontSize: '13px', fontWeight: '700', color: longPauses > 3 ? '#f59e0b' : '#38bdf8', marginTop: '2px' }}>
             {longPauses}
           </div>
         </div>
       </div>
 
-      {/* Ethical Observation Disclaimer */}
+      {/* Communication Observation Note */}
       <p style={{ fontSize: '10px', color: '#64748b', marginTop: '10px', lineHeight: '1.3' }}>
-        * Communication observations analyze speech pacing and camera engagement for practice clarity, not psychological judgments.
+        * Visual & audio indicators measure speech pacing and presence for your post-interview report.
       </p>
     </div>
   );
