@@ -66,11 +66,46 @@ export default function ResumeAnalysisPage({ setupConfig, onStartLiveInterview }
     'TensorFlow Developer Certificate'
   ];
 
+  const currentPersona = INTERVIEWER_PERSONAS.find(p => p.id === setupConfig?.interviewerPersona) || INTERVIEWER_PERSONAS[0];
+
   return (
     <div className="container" style={{ padding: '30px 24px 80px', maxWidth: '960px' }}>
-      {/* Top Status & Robot Animation */}
+      {/* Top Status & Interviewer Face Animation */}
       <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-        <RobotAvatar status={isAnalyzing ? 'thinking' : 'idle'} size={240} showStatusBadge={false} />
+        {currentPersona.id === 'robot' ? (
+          <RobotAvatar status={isAnalyzing ? 'thinking' : 'idle'} size={240} showStatusBadge={false} />
+        ) : (
+          <div style={{
+            width: '140px',
+            height: '140px',
+            margin: '0 auto',
+            position: 'relative',
+            borderRadius: '50%',
+            padding: '4px',
+            background: 'linear-gradient(135deg, #00f0ff, #a855f7)',
+            boxShadow: isAnalyzing ? '0 0 30px rgba(0, 240, 255, 0.4)' : 'none'
+          }}>
+            <img
+              src={currentPersona.image}
+              alt={currentPersona.name}
+              style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                objectFit: 'cover'
+              }}
+            />
+            {isAnalyzing && (
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '50%',
+                border: '2px dashed #00f0ff',
+                animation: 'rotateSlow 6s linear infinite'
+              }} />
+            )}
+          </div>
+        )}
 
         <div style={{ marginTop: '20px' }}>
           {isAnalyzing ? (
