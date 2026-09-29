@@ -1,70 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import sarahImg from '../assets/interviewers/sarah.jpg';
-import alexImg from '../assets/interviewers/alex.jpg';
-import priyaImg from '../assets/interviewers/priya.jpg';
-import marcusImg from '../assets/interviewers/marcus.jpg';
 import RobotAvatar from './RobotAvatar';
-import { Volume2, Sparkles, UserCheck, RefreshCw, Radio, Eye } from 'lucide-react';
+import { Volume2, Sparkles, Radio, Cpu, Activity } from 'lucide-react';
 
 export const INTERVIEWER_PERSONAS = [
-  {
-    id: 'sarah',
-    name: 'Sarah Chen',
-    title: 'Staff AI Engineer & Lead Interviewer',
-    company: 'TechCorp AI',
-    image: sarahImg,
-    tag: 'Technical & ML'
-  },
-  {
-    id: 'alex',
-    name: 'Alex Rivera',
-    title: 'Principal Systems Architect',
-    company: 'CloudScale Inc.',
-    image: alexImg,
-    tag: 'System Design & Backend'
-  },
-  {
-    id: 'priya',
-    name: 'Priya Sharma',
-    title: 'Engineering Director & Hiring Lead',
-    company: 'Innovate Labs',
-    image: priyaImg,
-    tag: 'Full Stack & Leadership'
-  },
-  {
-    id: 'marcus',
-    name: 'Marcus Vance',
-    title: 'Senior Tech Director & Architect',
-    company: 'Global Enterprises',
-    image: marcusImg,
-    tag: 'Architecture & Behavioral'
-  },
   {
     id: 'robot',
     name: 'Mockora Cyber AI',
     title: 'Adaptive Neural Interview Engine',
     company: 'Mockora Platform',
-    image: null,
     tag: 'Humanoid AI'
   }
 ];
 
 export default function InterviewerFace({
   status = 'idle', // 'speaking', 'listening', 'thinking', 'idle'
-  selectedInterviewerId = 'sarah',
-  onInterviewerChange,
   onReplayAudio
 }) {
-  const [currentId, setCurrentId] = useState(selectedInterviewerId || 'sarah');
   const [audioBars, setAudioBars] = useState([12, 24, 38, 20, 10, 30, 18]);
-  const [isNodding, setIsNodding] = useState(false);
 
-  // Sync external changes
-  useEffect(() => {
-    if (selectedInterviewerId) {
-      setCurrentId(selectedInterviewerId);
-    }
-  }, [selectedInterviewerId]);
+  const currentPersona = INTERVIEWER_PERSONAS[0];
 
   // Audio equalizer oscillation when speaking
   useEffect(() => {
@@ -83,26 +37,6 @@ export default function InterviewerFace({
     return () => clearInterval(interval);
   }, [status]);
 
-  // Subtle natural attentive nod when candidate is speaking (listening status)
-  useEffect(() => {
-    if (status === 'listening') {
-      const nodInterval = setInterval(() => {
-        setIsNodding(true);
-        setTimeout(() => setIsNodding(false), 900);
-      }, 4500);
-      return () => clearInterval(nodInterval);
-    }
-  }, [status]);
-
-  const currentPersona = INTERVIEWER_PERSONAS.find(p => p.id === currentId) || INTERVIEWER_PERSONAS[0];
-
-  const handleSelectInterviewer = (id) => {
-    setCurrentId(id);
-    if (onInterviewerChange) {
-      onInterviewerChange(id);
-    }
-  };
-
   const getStatusColor = () => {
     switch (status) {
       case 'speaking': return '#10b981';
@@ -117,7 +51,7 @@ export default function InterviewerFace({
       case 'speaking': return 'Interviewer Speaking';
       case 'listening': return 'Listening to You';
       case 'thinking': return 'Analyzing Response...';
-      default: return 'Interviewer Active';
+      default: return 'Interviewer Ready';
     }
   };
 
@@ -166,7 +100,7 @@ export default function InterviewerFace({
       <div style={{
         position: 'relative',
         width: '100%',
-        height: '270px',
+        height: '280px',
         borderRadius: '12px',
         overflow: 'hidden',
         background: '#020617',
@@ -175,67 +109,9 @@ export default function InterviewerFace({
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        {currentPersona.id === 'robot' ? (
-          <div style={{ transform: 'scale(0.92)' }}>
-            <RobotAvatar status={status} size={240} showStatusBadge={false} />
-          </div>
-        ) : (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            {/* Realistic Interviewer Face Photo with Dynamic Animations */}
-            <img
-              src={currentPersona.image}
-              alt={currentPersona.name}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                transform: isNodding ? 'scale(1.03) translateY(4px)' : status === 'speaking' ? 'scale(1.02)' : 'scale(1.0)',
-                transition: 'transform 0.4s ease, filter 0.3s ease',
-                filter: status === 'speaking' ? 'brightness(1.05) contrast(1.05)' : 'none'
-              }}
-            />
-
-            {/* Speaking Voice Glow Overlay */}
-            {status === 'speaking' && (
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                border: '2px solid rgba(16, 185, 129, 0.6)',
-                borderRadius: '12px',
-                boxShadow: 'inset 0 0 30px rgba(16, 185, 129, 0.3)',
-                pointerEvents: 'none'
-              }} />
-            )}
-
-            {/* Listening Gaze Halo */}
-            {status === 'listening' && (
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                border: '2px solid rgba(0, 240, 255, 0.5)',
-                borderRadius: '12px',
-                boxShadow: 'inset 0 0 25px rgba(0, 240, 255, 0.25)',
-                pointerEvents: 'none'
-              }} />
-            )}
-
-            {/* Thinking Holographic Scan Overlay */}
-            {status === 'thinking' && (
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(180deg, transparent 0%, rgba(168, 85, 247, 0.15) 50%, transparent 100%)',
-                animation: 'pulseGlow 2s infinite',
-                pointerEvents: 'none'
-              }} />
-            )}
-          </div>
-        )}
+        <div style={{ transform: 'scale(0.95)' }}>
+          <RobotAvatar status={status} size={250} showStatusBadge={false} />
+        </div>
 
         {/* Live Audio Equalizer Overlay when Speaking */}
         {status === 'speaking' && (
@@ -284,11 +160,11 @@ export default function InterviewerFace({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'rgba(3, 7, 18, 0.85)',
+          background: 'rgba(3, 7, 18, 0.88)',
           backdropFilter: 'blur(10px)',
-          padding: '6px 10px',
+          padding: '6px 12px',
           borderRadius: '8px',
-          border: '1px solid rgba(56, 189, 248, 0.15)',
+          border: '1px solid rgba(56, 189, 248, 0.2)',
           zIndex: 10
         }}>
           <div>
@@ -297,7 +173,7 @@ export default function InterviewerFace({
                 {currentPersona.name}
               </span>
               <span className="badge-cyber" style={{ fontSize: '9px', padding: '1px 6px' }}>
-                AI Evaluator
+                {currentPersona.tag}
               </span>
             </div>
             <div style={{ fontSize: '10px', color: '#94a3b8', lineHeight: '1.2' }}>
@@ -324,83 +200,24 @@ export default function InterviewerFace({
         <div style={{ position: 'absolute', top: '6px', right: '6px', width: '10px', height: '10px', borderTop: '2px solid #00f0ff', borderRight: '2px solid #00f0ff' }} />
       </div>
 
-      {/* Switch Interviewer Face Persona Selector */}
-      <div style={{ marginTop: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Select Interviewer Face
-          </span>
-          <span style={{ fontSize: '10px', color: '#38bdf8' }}>
-            {currentPersona.tag}
-          </span>
+      {/* Cyber AI Telemetry Status Footer */}
+      <div style={{
+        marginTop: '12px',
+        padding: '8px 12px',
+        borderRadius: '8px',
+        background: 'rgba(10, 16, 30, 0.6)',
+        border: '1px solid rgba(56, 189, 248, 0.12)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#94a3b8' }}>
+          <Cpu size={13} color="#00f0ff" />
+          <span>Mockora Cyber AI • Neural Speech & Gaze Active</span>
         </div>
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
-          gap: '6px'
-        }}>
-          {INTERVIEWER_PERSONAS.map((persona) => {
-            const isSelected = persona.id === currentId;
-            return (
-              <button
-                key={persona.id}
-                onClick={() => handleSelectInterviewer(persona.id)}
-                title={`${persona.name} (${persona.title})`}
-                style={{
-                  background: isSelected ? 'rgba(0, 240, 255, 0.15)' : 'rgba(15, 23, 42, 0.7)',
-                  border: isSelected ? '2px solid #00f0ff' : '1px solid rgba(56, 189, 248, 0.15)',
-                  borderRadius: '8px',
-                  padding: '4px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '4px',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {persona.image ? (
-                  <img
-                    src={persona.image}
-                    alt={persona.name}
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: isSelected ? '1.5px solid #00f0ff' : '1px solid #334155'
-                    }}
-                  />
-                ) : (
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    background: '#0f172a',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: isSelected ? '1.5px solid #00f0ff' : '1px solid #334155'
-                  }}>
-                    <Sparkles size={14} color="#00f0ff" />
-                  </div>
-                )}
-                <span style={{
-                  fontSize: '9px',
-                  fontWeight: isSelected ? '700' : '500',
-                  color: isSelected ? '#00f0ff' : '#94a3b8',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  width: '100%',
-                  textAlign: 'center'
-                }}>
-                  {persona.name.split(' ')[0]}
-                </span>
-              </button>
-            );
-          })}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#10b981', fontWeight: '600' }}>
+          <Activity size={12} />
+          <span>Online</span>
         </div>
       </div>
     </div>
