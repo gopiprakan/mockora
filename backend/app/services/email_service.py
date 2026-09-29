@@ -5,127 +5,221 @@ from typing import Dict, Any
 from ..config import settings
 
 def generate_email_html(report: Dict[str, Any]) -> str:
-    """Generates an HTML email report with dark futuristic Mockora branding."""
+    """Generates an HTML email report matching the exact Mockora email layout."""
     name = report.get("candidate_name", "Student")
     role = report.get("role", "Software Developer")
-    score = report.get("overall_score", 78)
-    duration = report.get("duration_minutes", 15)
+    overall_score = report.get("overall_score", 78)
+    
     category_scores = report.get("category_scores", {})
     tech_score = category_scores.get("Technical Knowledge", 78)
     comm_score = category_scores.get("Communication", 74)
-    strengths = report.get("strengths", [])
-    improvements = report.get("areas_to_improve", [])
-    topics = report.get("recommended_topics", [])
-    report_id = report.get("id", "")
+    prob_score = category_scores.get("Problem Solving", 82)
+    rel_score = category_scores.get("Answer Relevance", 86)
+    struct_score = category_scores.get("Answer Structure", 72)
     
-    strengths_li = "".join([f"<li style='margin-bottom: 6px;'>{s}</li>" for s in strengths])
-    improvements_li = "".join([f"<li style='margin-bottom: 6px;'>{i}</li>" for i in improvements])
-    topics_tags = " ".join([f"<span style='display:inline-block; background:#1e293b; color:#38bdf8; border:1px solid #0284c7; padding:4px 10px; border-radius:12px; margin:3px; font-size:12px;'>{t}</span>" for t in topics])
+    strengths = report.get("strengths", [
+        "Good understanding of fundamental engineering concepts and architectural flow.",
+        "Relevant project explanations tied directly to real-world software tooling.",
+        "Logical problem-solving approach when tackling follow-up constraints."
+    ])
+    improvements = report.get("areas_to_improve", [
+        "Give more concrete quantitative metrics and real-world system examples.",
+        "Structure complex answers using a defined framework such as STAR (Situation, Task, Action, Result).",
+        "Deepen your understanding of database query optimization and error recovery handling."
+    ])
+    topics = report.get("recommended_topics", [
+        "SQL Joins & Indexing",
+        "Object-Oriented Design (SOLID)",
+        "REST API Best Practices",
+        "Data Structures & Time Complexity"
+    ])
+    
+    comm_summary = report.get("communication_summary", {})
+    cam_engagement = comm_summary.get("camera_engagement", "Good")
+    long_pauses = comm_summary.get("long_pauses", 2)
+    filler_words = comm_summary.get("filler_words", 5)
+    avg_resp_time = comm_summary.get("average_response_time", "4.1 seconds")
+    if isinstance(avg_resp_time, (int, float)):
+        avg_resp_time = f"{avg_resp_time} seconds"
+    elif not str(avg_resp_time).endswith("seconds") and not str(avg_resp_time).endswith("s"):
+        avg_resp_time = f"{avg_resp_time} seconds"
 
-    return f"""
-<!DOCTYPE html>
+    strengths_li = "".join([f"<li style='margin-bottom: 8px; line-height: 1.5;'>{s}</li>" for s in strengths])
+    improvements_li = "".join([f"<li style='margin-bottom: 8px; line-height: 1.5;'>{i}</li>" for i in improvements])
+    topics_li = "".join([f"<li style='margin-bottom: 6px; line-height: 1.5; font-weight: 500;'>{t}</li>" for t in topics])
+
+    return f"""<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Your Mockora AI Mock Interview Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockora AI Mock Interview Report</title>
 </head>
-<body style="margin:0; padding:0; background-color:#090d16; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:#e2e8f0;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#090d16; padding: 30px 10px;">
+<body style="margin: 0; padding: 0; background-color: #0b0f19; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e2e8f0; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0b0f19; padding: 30px 15px;">
     <tr>
       <td align="center">
-        <table width="600" border="0" cellspacing="0" cellpadding="0" style="max-width:600px; background-color:#0f172a; border-radius:16px; border: 1px solid #1e293b; overflow:hidden; box-shadow: 0 10px 30px rgba(0, 240, 255, 0.1);">
-          <!-- Header -->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #111827; border-radius: 14px; border: 1px solid #1f2937; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          
+          <!-- Top Greeting & Intro -->
           <tr>
-            <td style="background: linear-gradient(135deg, #091a2f 0%, #0d2547 100%); padding: 30px; text-align: center; border-bottom: 1px solid #1e3a5f;">
-              <h1 style="margin:0; color:#38bdf8; font-size: 26px; letter-spacing: 2px; text-transform: uppercase;">MOCKORA</h1>
-              <p style="margin:5px 0 0 0; color:#94a3b8; font-size: 14px;">Your AI Interview Coach</p>
+            <td style="padding: 32px 32px 20px 32px;">
+              <p style="margin: 0 0 14px 0; font-size: 16px; color: #f9fafb; font-weight: 600;">Hello {name},</p>
+              <p style="margin: 0 0 14px 0; font-size: 14px; color: #9ca3af; line-height: 1.6;">
+                Thank you for completing your mock interview with <strong>Mockora</strong>.
+              </p>
+              <p style="margin: 0; font-size: 14px; color: #9ca3af; line-height: 1.6;">
+                Your interview evaluation has been completed. Below is your detailed performance summary.
+              </p>
             </td>
           </tr>
-          
-          <!-- Content Body -->
+
+          <!-- Banner / Header -->
           <tr>
-            <td style="padding: 30px;">
-              <h2 style="margin-top:0; color:#f8fafc; font-size:20px;">Interview Report for {name}</h2>
-              <p style="color:#94a3b8; font-size:14px; margin-bottom: 25px;">
-                Role: <strong style="color:#38bdf8;">{role}</strong> &nbsp;|&nbsp; Duration: <strong style="color:#f8fafc;">{duration} minutes</strong>
-              </p>
-              
-              <!-- Score Card -->
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background:#090d16; border-radius:12px; border:1px solid #1e293b; margin-bottom: 25px;">
-                <tr>
-                  <td width="50%" align="center" style="padding: 20px; border-right: 1px solid #1e293b;">
-                    <div style="font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Overall Practice Score</div>
-                    <div style="font-size: 40px; font-weight: bold; color: #00f0ff; margin-top: 5px;">{score}<span style="font-size:18px; color:#64748b;">/100</span></div>
-                  </td>
-                  <td width="50%" style="padding: 20px;">
-                    <div style="margin-bottom: 10px; font-size: 13px;">
-                      <span style="color:#cbd5e1;">Technical Score:</span> <strong style="color:#38bdf8; float:right;">{tech_score}%</strong>
-                    </div>
-                    <div style="font-size: 13px;">
-                      <span style="color:#cbd5e1;">Communication:</span> <strong style="color:#a855f7; float:right;">{comm_score}%</strong>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Strengths -->
-              <div style="margin-bottom: 25px;">
-                <h3 style="color:#10b981; font-size:16px; margin-bottom: 10px;">Key Strengths</h3>
-                <ul style="color:#cbd5e1; font-size:14px; line-height: 1.5; padding-left: 20px; margin: 0;">
-                  {strengths_li}
-                </ul>
-              </div>
-
-              <!-- Areas to Improve -->
-              <div style="margin-bottom: 25px;">
-                <h3 style="color:#f59e0b; font-size:16px; margin-bottom: 10px;">Areas to Improve</h3>
-                <ul style="color:#cbd5e1; font-size:14px; line-height: 1.5; padding-left: 20px; margin: 0;">
-                  {improvements_li}
-                </ul>
-              </div>
-
-              <!-- Recommended Topics -->
-              <div style="margin-bottom: 30px;">
-                <h3 style="color:#38bdf8; font-size:16px; margin-bottom: 10px;">Recommended Topics to Practice</h3>
-                <div>
-                  {topics_tags}
-                </div>
-              </div>
-
-              <!-- Button CTA -->
-              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <td style="padding: 0 32px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top: 1px solid #374151; border-bottom: 1px solid #374151; padding: 18px 0; text-align: center;">
                 <tr>
                   <td align="center">
-                    <a href="http://localhost:5173/report/{report_id}" style="display:inline-block; background: linear-gradient(135deg, #0284c7 0%, #00f0ff 100%); color:#090d16; font-weight:bold; text-decoration:none; padding: 12px 28px; border-radius:8px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
-                      View Full Analysis in Dashboard
-                    </a>
+                    <div style="font-size: 22px; font-weight: 800; letter-spacing: 3px; color: #38bdf8; text-transform: uppercase;">MOCKORA</div>
+                    <div style="font-size: 12px; font-weight: 600; letter-spacing: 2px; color: #9ca3af; text-transform: uppercase; margin-top: 4px;">AI MOCK INTERVIEW REPORT</div>
                   </td>
                 </tr>
               </table>
+            </td>
+          </tr>
 
-              <p style="font-size: 11px; color: #64748b; text-align: center; margin-top: 25px; line-height: 1.4;">
-                *Note: Mockora Practice Scores are AI-generated simulation metrics designed to help you prepare and boost your interview confidence.
+          <!-- Section: Skill Evaluation Breakdown -->
+          <tr>
+            <td style="padding: 24px 32px;">
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #f3f4f6; text-transform: uppercase; margin-bottom: 14px;">SKILL EVALUATION BREAKDOWN</div>
+              <table width="100%" border="0" cellspacing="0" cellpadding="8" style="background-color: #0d1322; border-radius: 8px; border: 1px solid #1f2937; font-size: 14px;">
+                <tr>
+                  <td style="color: #d1d5db; padding: 10px 14px; border-bottom: 1px solid #1f2937;">Technical Knowledge</td>
+                  <td align="right" style="color: #38bdf8; font-weight: 700; padding: 10px 14px; border-bottom: 1px solid #1f2937;">{tech_score}%</td>
+                </tr>
+                <tr>
+                  <td style="color: #d1d5db; padding: 10px 14px; border-bottom: 1px solid #1f2937;">Communication</td>
+                  <td align="right" style="color: #a855f7; font-weight: 700; padding: 10px 14px; border-bottom: 1px solid #1f2937;">{comm_score}%</td>
+                </tr>
+                <tr>
+                  <td style="color: #d1d5db; padding: 10px 14px; border-bottom: 1px solid #1f2937;">Problem Solving</td>
+                  <td align="right" style="color: #3b82f6; font-weight: 700; padding: 10px 14px; border-bottom: 1px solid #1f2937;">{prob_score}%</td>
+                </tr>
+                <tr>
+                  <td style="color: #d1d5db; padding: 10px 14px; border-bottom: 1px solid #1f2937;">Answer Relevance</td>
+                  <td align="right" style="color: #10b981; font-weight: 700; padding: 10px 14px; border-bottom: 1px solid #1f2937;">{rel_score}%</td>
+                </tr>
+                <tr>
+                  <td style="color: #d1d5db; padding: 10px 14px;">Answer Structure</td>
+                  <td align="right" style="color: #f59e0b; font-weight: 700; padding: 10px 14px;">{struct_score}%</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Section Divider -->
+          <tr><td style="padding: 0 32px;"><div style="border-top: 1px solid #1f2937;"></div></td></tr>
+
+          <!-- Section: Key Strengths -->
+          <tr>
+            <td style="padding: 24px 32px;">
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #10b981; text-transform: uppercase; margin-bottom: 12px;">KEY STRENGTHS</div>
+              <ul style="margin: 0; padding-left: 20px; color: #d1d5db; font-size: 14px;">
+                {strengths_li}
+              </ul>
+            </td>
+          </tr>
+
+          <!-- Section Divider -->
+          <tr><td style="padding: 0 32px;"><div style="border-top: 1px solid #1f2937;"></div></td></tr>
+
+          <!-- Section: Areas to Improve -->
+          <tr>
+            <td style="padding: 24px 32px;">
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #f59e0b; text-transform: uppercase; margin-bottom: 12px;">AREAS TO IMPROVE</div>
+              <ul style="margin: 0; padding-left: 20px; color: #d1d5db; font-size: 14px;">
+                {improvements_li}
+              </ul>
+            </td>
+          </tr>
+
+          <!-- Section Divider -->
+          <tr><td style="padding: 0 32px;"><div style="border-top: 1px solid #1f2937;"></div></td></tr>
+
+          <!-- Section: Recommended Topics -->
+          <tr>
+            <td style="padding: 24px 32px;">
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #38bdf8; text-transform: uppercase; margin-bottom: 8px;">RECOMMENDED TOPICS</div>
+              <p style="margin: 0 0 12px 0; font-size: 13px; color: #9ca3af;">Focus your revision on these concepts before your next technical interview:</p>
+              <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 14px;">
+                {topics_li}
+              </ul>
+            </td>
+          </tr>
+
+          <!-- Section Divider -->
+          <tr><td style="padding: 0 32px;"><div style="border-top: 1px solid #1f2937;"></div></td></tr>
+
+          <!-- Section: Communication Observations -->
+          <tr>
+            <td style="padding: 24px 32px;">
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #f3f4f6; text-transform: uppercase; margin-bottom: 14px;">COMMUNICATION OBSERVATIONS</div>
+              <table width="100%" border="0" cellspacing="0" cellpadding="6" style="background-color: #0d1322; border-radius: 8px; border: 1px solid #1f2937; font-size: 13px; margin-bottom: 14px;">
+                <tr>
+                  <td style="color: #9ca3af; padding: 8px 12px;">Camera Engagement</td>
+                  <td align="right" style="color: #10b981; font-weight: 600; padding: 8px 12px;">{cam_engagement}</td>
+                </tr>
+                <tr>
+                  <td style="color: #9ca3af; padding: 8px 12px;">Long Pauses</td>
+                  <td align="right" style="color: #f3f4f6; font-weight: 600; padding: 8px 12px;">{long_pauses}</td>
+                </tr>
+                <tr>
+                  <td style="color: #9ca3af; padding: 8px 12px;">Filler Words</td>
+                  <td align="right" style="color: #f3f4f6; font-weight: 600; padding: 8px 12px;">{filler_words}</td>
+                </tr>
+                <tr>
+                  <td style="color: #9ca3af; padding: 8px 12px;">Average Response Time</td>
+                  <td align="right" style="color: #38bdf8; font-weight: 600; padding: 8px 12px;">{avg_resp_time}</td>
+                </tr>
+              </table>
+              <p style="margin: 0; font-size: 12px; color: #6b7280; font-style: italic; line-height: 1.4;">
+                Note: Communication observations assess speech flow and engagement, not psychological traits.
               </p>
             </td>
           </tr>
-          
-          <!-- Footer -->
+
+          <!-- Section Divider -->
+          <tr><td style="padding: 0 32px;"><div style="border-top: 1px solid #1f2937;"></div></td></tr>
+
+          <!-- Section: Next Step & Signoff -->
           <tr>
-            <td style="background-color:#0b1120; padding: 20px; text-align: center; border-top: 1px solid #1e293b; color:#64748b; font-size: 12px;">
-              &copy; 2026 Mockora AI. Built for college students & freshers.
+            <td style="padding: 24px 32px 32px 32px;">
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: #f3f4f6; text-transform: uppercase; margin-bottom: 10px;">NEXT STEP</div>
+              <p style="margin: 0 0 16px 0; font-size: 14px; color: #9ca3af; line-height: 1.6;">
+                Review the recommended topics and practice another Mockora interview to track your improvement.
+              </p>
+              <p style="margin: 0 0 24px 0; font-size: 14px; color: #38bdf8; font-weight: 600;">
+                Keep learning. Keep practicing. Keep improving.
+              </p>
+              <div style="border-top: 1px solid #1f2937; padding-top: 18px; color: #9ca3af; font-size: 13px; line-height: 1.5;">
+                Regards,<br>
+                <strong style="color: #f9fafb;">Mockora</strong><br>
+                AI Interview Coach
+              </div>
             </td>
           </tr>
+
         </table>
       </td>
     </tr>
   </table>
 </body>
-</html>
-"""
+</html>"""
 
 def send_interview_report_email(report: Dict[str, Any], recipient_email: str) -> Dict[str, Any]:
     """Sends the interview report via SMTP if configured, or returns simulated success."""
-    subject = "Your Mockora AI Mock Interview Report"
+    name = report.get("candidate_name", "Student")
+    subject = f"Your Mockora AI Mock Interview Report - {name}"
     html_content = generate_email_html(report)
     
     # If SMTP is configured

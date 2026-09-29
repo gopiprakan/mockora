@@ -282,19 +282,25 @@ async def evaluate_answer(
     # Try calling Gemini if available
     if settings.GEMINI_API_KEY:
         prompt = f"""
-You are Mockora, an expert AI technical interviewer.
+You are Mockora, an expert AI Technical Interviewer & Engineering Evaluator.
 Evaluate the candidate's answer for the following question for a {role} position.
+
+IMPORTANT INSTRUCTION FOR FAIR SCORING:
+Evaluate fairly and objectively based strictly on the student's actual answer quality, technical accuracy, relevance, and problem-solving maturity.
+- Give credit for clear reasoning, mention of specific technologies, architectural awareness, and logical problem-solving.
+- Deduct marks if the answer is superficial, vague, lacks real technical depth, or misses the core question.
+- Do not arbitrarily assign default grades; differentiate between basic, intermediate, and advanced performance fairly.
 
 Question: "{question_text}"
 Candidate's Answer: "{answer_text}"
 
-Evaluate across these 6 criteria on a 0-10 scale (with 1 decimal place, e.g. 8.5):
-1. technical_score: Technical accuracy and depth of concepts explained
-2. relevance_score: Directness and relevance to the specific question asked
-3. communication_score: Clarity, articulation, and vocabulary
-4. structure_score: Organization (e.g. STAR method, chronological, structured)
-5. problem_solving_score: Analytical thinking and handling constraints
-6. examples_score: Inclusion of concrete metrics, projects, or practical examples
+Evaluate across these 6 criteria on a 0-10 scale (with 1 decimal place, e.g. 7.8, 8.4):
+1. technical_score: Technical accuracy and depth of concepts explained (0-10)
+2. relevance_score: Directness and relevance to the specific question asked (0-10)
+3. communication_score: Clarity, articulation, and vocabulary (0-10)
+4. structure_score: Organization (e.g. STAR method, chronological, structured) (0-10)
+5. problem_solving_score: Analytical thinking and handling constraints (0-10)
+6. examples_score: Inclusion of concrete metrics, projects, or practical examples (0-10)
 
 Also provide:
 - feedback: 2-3 sentences of constructive, encouraging feedback highlighting strengths and specific improvement areas.
@@ -302,12 +308,12 @@ Also provide:
 
 Return ONLY valid JSON in this exact structure:
 {{
-  "technical_score": 8.0,
-  "relevance_score": 8.5,
-  "communication_score": 7.5,
-  "structure_score": 7.0,
-  "problem_solving_score": 8.0,
-  "examples_score": 7.5,
+  "technical_score": 7.8,
+  "relevance_score": 8.6,
+  "communication_score": 7.4,
+  "structure_score": 7.2,
+  "problem_solving_score": 8.2,
+  "examples_score": 7.0,
   "feedback": "...",
   "improved_answer": "..."
 }}
