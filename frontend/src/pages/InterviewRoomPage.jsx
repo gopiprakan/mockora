@@ -260,7 +260,7 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
         <div>
           <InterviewerFace
             status={robotStatus}
-            selectedInterviewerId={sessionData?.interviewer_persona || 'sarah'}
+            selectedInterviewerId={sessionData?.interviewer_persona || 'robot'}
             onReplayAudio={handleReplayQuestion}
           />
 
