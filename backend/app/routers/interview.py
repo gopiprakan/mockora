@@ -242,6 +242,13 @@ async def finish_interview(payload: FinishInterviewRequest):
     report_id = save_final_report(report_dict)
     report_dict["id"] = report_id
     
+    # Save report to Google Sheets & Trigger Google Apps Script Email Workflow
+    try:
+        sheets_res = await sync_report_to_google_sheets(report_dict)
+        report_dict["sheets_sync"] = sheets_res
+    except Exception as e:
+        print(f"Error syncing report to Google Sheets: {e}")
+    
     return {
         "status": "success",
         "report": report_dict
