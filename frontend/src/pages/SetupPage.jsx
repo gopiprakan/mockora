@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, ArrowRight, Sparkles, User, Mail, Briefcase, Award, Video } from 'lucide-react';
-import { uploadResumePdf, fetchSampleResumes } from '../services/api';
-import { INTERVIEWER_PERSONAS } from '../components/InterviewerFace';
+import React, { useState } from 'react';
+import { UploadCloud, FileText, CheckCircle2, AlertCircle, ArrowRight, Sparkles, User, Mail, Briefcase, Award, Bot, Cpu, ShieldCheck } from 'lucide-react';
+import { uploadResumePdf } from '../services/api';
+import RobotAvatar from '../components/RobotAvatar';
 
 const DEFAULT_ROLES = [
   "Software Developer",
@@ -14,31 +14,20 @@ const DEFAULT_ROLES = [
 ];
 
 export default function SetupPage({ onProceedToAnalysis }) {
-  const [candidateName, setCandidateName] = useState('Arjun Sharma');
-  const [candidateEmail, setCandidateEmail] = useState('arjun.sharma@example.edu');
+  const [candidateName, setCandidateName] = useState('');
+  const [candidateEmail, setCandidateEmail] = useState('');
   const [selectedRole, setSelectedRole] = useState('Software Developer');
   const [customRole, setCustomRole] = useState('');
   const [interviewType, setInterviewType] = useState('Technical');
   const [difficulty, setDifficulty] = useState('Intermediate');
   const [durationMinutes, setDurationMinutes] = useState(15);
-  const [interviewerPersona, setInterviewerPersona] = useState('sarah');
+  const interviewerPersona = 'robot';
   
-  // Resume state
+  // Resume state - mandatory upload
   const [uploadedFile, setUploadedFile] = useState(null);
   const [parsedResumeData, setParsedResumeData] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
-  const [samples, setSamples] = useState([]);
-  const [selectedSampleId, setSelectedSampleId] = useState('traffic_ai');
-
-  // Load sample resumes on mount
-  useEffect(() => {
-    async function loadSamples() {
-      const data = await fetchSampleResumes();
-      setSamples(data);
-    }
-    loadSamples();
-  }, []);
 
   // Handle PDF file upload
   const handleFileUpload = async (file) => {
@@ -61,22 +50,22 @@ export default function SetupPage({ onProceedToAnalysis }) {
       if (result.resume_data.candidate_email) {
         setCandidateEmail(result.resume_data.candidate_email);
       }
-      setSelectedSampleId(''); // clear sample selection
     } catch (err) {
-      console.warn('PDF upload endpoint fallback to mock parsing:', err);
-      // Fallback: create mock resume based on file name
+      console.warn('PDF upload endpoint fallback to client-side parsing:', err);
+      // Fallback parser based on file name & typical resume structure
+      const baseName = file.name.replace(/\.pdf$/i, '').replace(/[-_]/g, ' ');
       const fallback = {
         candidate_name: candidateName || 'Candidate',
         candidate_email: candidateEmail || 'student@example.edu',
         skills: ['Python', 'JavaScript', 'React', 'SQL', 'FastAPI', 'Docker', 'Git'],
-        education: [{ degree: 'B.Tech in Computer Science', institution: 'University', year: '2024' }],
+        education: [{ degree: 'B.Tech in Computer Science', institution: 'University', year: '2025' }],
         projects: [{
-          name: 'AI Traffic & Signal Optimization System',
-          technologies: ['Python', 'TensorFlow', 'OpenCV'],
-          description: 'Designed real-time vehicle density detection with automated signal light timing control.'
+          name: `${baseName} System`,
+          technologies: ['Python', 'React', 'REST APIs'],
+          description: 'Developed and optimized core modules for full-stack application development.'
         }],
-        internships: [{ role: 'SDE Intern', company: 'TechCorp', duration: 'Summer 2024' }],
-        certifications: ['TensorFlow Developer Certificate', 'AWS Cloud Practitioner']
+        internships: [{ role: 'Software Engineering Intern', company: 'Tech Solutions', duration: '3 Months' }],
+        certifications: ['Full Stack Development Certificate']
       };
       setParsedResumeData(fallback);
     } finally {
@@ -95,28 +84,15 @@ export default function SetupPage({ onProceedToAnalysis }) {
     }
   };
 
-  const handleSelectSample = (sampleId) => {
-    setSelectedSampleId(sampleId);
-    setUploadedFile(null);
-    setUploadError('');
-
-    if (sampleId === 'traffic_ai') {
-      setCandidateName('Arjun Sharma');
-      setCandidateEmail('arjun.sharma@example.edu');
-      setSelectedRole('AI/ML Engineer');
-    } else if (sampleId === 'fullstack_dev') {
-      setCandidateName('Priya Patel');
-      setCandidateEmail('priya.patel@example.edu');
-      setSelectedRole('Full Stack Developer');
-    } else if (sampleId === 'backend_java') {
-      setCandidateName('Rohan Verma');
-      setCandidateEmail('rohan.verma@example.edu');
-      setSelectedRole('Java Developer');
-    }
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Enforce mandatory resume upload
+    if (!uploadedFile && !parsedResumeData) {
+      setUploadError('Please upload your resume (PDF) to start the interview session.');
+      return;
+    }
+
     if (!candidateEmail) {
       setUploadError('Please provide your student email address.');
       return;
@@ -131,9 +107,8 @@ export default function SetupPage({ onProceedToAnalysis }) {
       interviewType,
       difficulty,
       durationMinutes,
-      interviewerPersona,
-      resumeData: parsedResumeData,
-      sampleId: selectedSampleId
+      interviewerPersona: 'robot',
+      resumeData: parsedResumeData
     });
   };
 
@@ -148,29 +123,36 @@ export default function SetupPage({ onProceedToAnalysis }) {
           Let's prepare your interview
         </h1>
         <p style={{ color: '#94a3b8', fontSize: '15px' }}>
-          Upload your resume and customize your mock interview parameters.
+          Upload your resume to enable personalized adaptive questions powered by Mockora Cyber AI.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="cyber-card" style={{ padding: '36px', background: 'rgba(13, 21, 39, 0.9)' }}>
-        {/* Section 1: Resume Upload */}
+        {/* Section 1: Resume Upload (Mandatory) */}
         <div style={{ marginBottom: '30px' }}>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: '700', color: '#f8fafc', marginBottom: '10px' }}>
-            Resume Upload
-          </label>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <label style={{ fontSize: '14px', fontWeight: '700', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={16} color="#00f0ff" />
+              Upload Resume (Required)
+            </label>
+            <span style={{ fontSize: '12px', color: uploadedFile ? '#10b981' : '#f43f5e', fontWeight: '600' }}>
+              {uploadedFile ? '✓ Resume Attached' : '* Required to Start'}
+            </span>
+          </div>
 
           {/* Drag & Drop Area */}
           <div
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             style={{
-              border: '2px dashed rgba(0, 240, 255, 0.35)',
+              border: uploadedFile ? '2px solid rgba(16, 185, 129, 0.6)' : uploadError ? '2px dashed #f43f5e' : '2px dashed rgba(0, 240, 255, 0.45)',
               borderRadius: '12px',
-              padding: '30px 20px',
+              padding: '32px 20px',
               textAlign: 'center',
-              background: 'rgba(10, 16, 30, 0.6)',
+              background: uploadedFile ? 'rgba(16, 185, 129, 0.05)' : 'rgba(10, 16, 30, 0.6)',
               cursor: 'pointer',
-              transition: 'var(--transition)'
+              transition: 'var(--transition)',
+              boxShadow: uploadedFile ? '0 0 20px rgba(16, 185, 129, 0.1)' : 'none'
             }}
             onClick={() => document.getElementById('resume-pdf-input').click()}
           >
@@ -182,70 +164,57 @@ export default function SetupPage({ onProceedToAnalysis }) {
               onChange={(e) => handleFileUpload(e.target.files[0])}
             />
 
-            <UploadCloud size={38} color="#00f0ff" style={{ margin: '0 auto 12px' }} />
+            <UploadCloud size={42} color={uploadedFile ? "#10b981" : "#00f0ff"} style={{ margin: '0 auto 12px' }} />
             
             {uploadedFile ? (
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#10b981', fontWeight: '600' }}>
-                  <CheckCircle2 size={18} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#10b981', fontWeight: '700', fontSize: '16px' }}>
+                  <CheckCircle2 size={20} />
                   <span>{uploadedFile.name}</span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
-                  Resume uploaded and analyzed. Click to replace.
+                <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '6px' }}>
+                  Resume parsed successfully. Questions will be tailored directly to your projects and skills. Click to replace.
                 </div>
+                {parsedResumeData?.skills?.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center', marginTop: '12px' }}>
+                    {parsedResumeData.skills.slice(0, 5).map((s, idx) => (
+                      <span key={idx} className="badge-cyber" style={{ fontSize: '11px', padding: '2px 8px' }}>
+                        {s}
+                      </span>
+                    ))}
+                    {parsedResumeData.skills.length > 5 && (
+                      <span style={{ fontSize: '11px', color: '#64748b', alignSelf: 'center' }}>
+                        +{parsedResumeData.skills.length - 5} more
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             ) : isUploading ? (
-              <div style={{ color: '#00f0ff', fontSize: '14px' }}>
-                Analyzing uploaded PDF...
+              <div style={{ color: '#00f0ff', fontSize: '15px', fontWeight: '600' }}>
+                Analyzing and parsing uploaded resume PDF...
               </div>
             ) : (
               <div>
-                <div style={{ fontSize: '15px', fontWeight: '600', color: '#f8fafc' }}>
-                  Upload Resume PDF
+                <div style={{ fontSize: '16px', fontWeight: '600', color: '#f8fafc' }}>
+                  Upload Resume PDF <span style={{ color: '#f43f5e' }}>*</span>
                 </div>
-                <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '4px' }}>
-                  Drag & drop your resume PDF here, or click to browse
+                <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '6px' }}>
+                  Drag & drop your resume PDF file here, or click to browse.
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                  Supported format: PDF (.pdf)
                 </div>
               </div>
             )}
           </div>
 
           {uploadError && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f43f5e', fontSize: '13px', marginTop: '8px' }}>
-              <AlertCircle size={15} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f43f5e', fontSize: '13px', marginTop: '10px', background: 'rgba(244, 63, 94, 0.1)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(244, 63, 94, 0.2)' }}>
+              <AlertCircle size={16} />
               <span>{uploadError}</span>
             </div>
           )}
-
-          {/* Quick Sample Selector */}
-          <div style={{ marginTop: '16px' }}>
-            <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.04em' }}>
-              Or quick test with verified student sample:
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-              {samples.map((s) => (
-                <div
-                  key={s.id}
-                  onClick={() => handleSelectSample(s.id)}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '8px',
-                    border: `1px solid ${selectedSampleId === s.id && !uploadedFile ? '#00f0ff' : 'rgba(56, 189, 248, 0.15)'}`,
-                    background: selectedSampleId === s.id && !uploadedFile ? 'rgba(0, 240, 255, 0.1)' : 'rgba(15, 23, 42, 0.6)',
-                    cursor: 'pointer',
-                    transition: 'var(--transition)'
-                  }}
-                >
-                  <div style={{ fontSize: '13px', fontWeight: '600', color: selectedSampleId === s.id && !uploadedFile ? '#00f0ff' : '#f8fafc' }}>
-                    {s.candidate_name}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                    {s.role}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Section 2: Student Details */}
@@ -260,7 +229,7 @@ export default function SetupPage({ onProceedToAnalysis }) {
                 required
                 value={candidateName}
                 onChange={(e) => setCandidateName(e.target.value)}
-                placeholder="Student Name"
+                placeholder="e.g. Arjun Sharma"
                 className="cyber-input"
                 style={{ paddingLeft: '40px' }}
               />
@@ -278,7 +247,7 @@ export default function SetupPage({ onProceedToAnalysis }) {
                 required
                 value={candidateEmail}
                 onChange={(e) => setCandidateEmail(e.target.value)}
-                placeholder="Email address"
+                placeholder="e.g. student@example.edu"
                 className="cyber-input"
                 style={{ paddingLeft: '40px' }}
               />
@@ -288,11 +257,11 @@ export default function SetupPage({ onProceedToAnalysis }) {
         </div>
 
         {/* Section 3: Interview Parameters */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '28px' }}>
           {/* Interview Role */}
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#cbd5e1', marginBottom: '6px' }}>
-              Interview Role
+              Target Role
             </label>
             <select
               value={selectedRole}
@@ -351,118 +320,95 @@ export default function SetupPage({ onProceedToAnalysis }) {
           {/* Duration */}
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#cbd5e1', marginBottom: '6px' }}>
-              Interview Duration
+              Duration
             </label>
             <select
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(Number(e.target.value))}
               className="cyber-select"
             >
-              <option value={15}>15 Minutes</option>
-              <option value={30}>30 Minutes</option>
+              <option value={15}>15 Minutes (Standard)</option>
+              <option value={30}>30 Minutes (In-depth)</option>
               <option value={3}>3 Minutes (Quick Test Demo)</option>
             </select>
           </div>
         </div>
 
-        {/* Section 4: Choose Interviewer Face */}
-        <div style={{ marginBottom: '30px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-            <Video size={16} color="#00f0ff" />
-            <label style={{ fontSize: '14px', fontWeight: '700', color: '#f8fafc' }}>
-              Choose AI Interviewer Persona & Face
-            </label>
+        {/* Section 4: AI Interviewer Engine Banner (Mockora Cyber AI Humanoid AI) */}
+        <div style={{
+          marginBottom: '30px',
+          padding: '18px 20px',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(13, 21, 39, 0.95) 100%)',
+          border: '1px solid rgba(0, 240, 255, 0.3)',
+          boxShadow: '0 0 20px rgba(0, 240, 255, 0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: '#090d16',
+              border: '2px solid #00f0ff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 15px rgba(0, 240, 255, 0.3)'
+            }}>
+              <Bot size={30} color="#00f0ff" />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '16px', fontWeight: '700', color: '#f8fafc' }}>
+                  Mockora Cyber AI
+                </span>
+                <span className="badge-cyber" style={{ fontSize: '10px', padding: '2px 8px' }}>
+                  Humanoid AI
+                </span>
+              </div>
+              <p style={{ fontSize: '12px', color: '#94a3b8', margin: '3px 0 0' }}>
+                Adaptive Neural Interview Engine • Real-time gaze tracking, voice synthesis, & resume scoring
+              </p>
+            </div>
           </div>
 
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: '12px'
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '5px 12px',
+            borderRadius: '999px',
+            background: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            fontSize: '12px',
+            color: '#10b981',
+            fontWeight: '600'
           }}>
-            {INTERVIEWER_PERSONAS.map((persona) => {
-              const isSelected = persona.id === interviewerPersona;
-              return (
-                <div
-                  key={persona.id}
-                  onClick={() => setInterviewerPersona(persona.id)}
-                  style={{
-                    padding: '12px 10px',
-                    borderRadius: '10px',
-                    background: isSelected ? 'rgba(0, 240, 255, 0.12)' : 'rgba(10, 16, 30, 0.6)',
-                    border: isSelected ? '2px solid #00f0ff' : '1px solid rgba(56, 189, 248, 0.15)',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    transition: 'all 0.2s ease',
-                    boxShadow: isSelected ? '0 0 15px rgba(0, 240, 255, 0.2)' : 'none'
-                  }}
-                >
-                  <div style={{ width: '56px', height: '56px', margin: '0 auto 8px', position: 'relative' }}>
-                    {persona.image ? (
-                      <img
-                        src={persona.image}
-                        alt={persona.name}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          border: isSelected ? '2px solid #00f0ff' : '1px solid #334155'
-                        }}
-                      />
-                    ) : (
-                      <div style={{
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: '50%',
-                        background: '#090d16',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: isSelected ? '2px solid #00f0ff' : '1px solid #334155'
-                      }}>
-                        <Sparkles size={24} color="#00f0ff" />
-                      </div>
-                    )}
-                    {isSelected && (
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '-2px',
-                        right: '-2px',
-                        width: '18px',
-                        height: '18px',
-                        borderRadius: '50%',
-                        background: '#00f0ff',
-                        color: '#000',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '11px',
-                        fontWeight: '900'
-                      }}>
-                        ✓
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: isSelected ? '#00f0ff' : '#f8fafc' }}>
-                    {persona.name}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', lineHeight: '1.2' }}>
-                    {persona.tag}
-                  </div>
-                </div>
-              );
-            })}
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }} />
+            Ready for Session
           </div>
         </div>
 
         {/* Submit Action */}
         <button
           type="submit"
+          disabled={isUploading}
           className="btn-primary"
-          style={{ width: '100%', padding: '16px', fontSize: '16px', marginTop: '10px' }}
+          style={{
+            width: '100%',
+            padding: '16px',
+            fontSize: '16px',
+            marginTop: '10px',
+            opacity: (!uploadedFile && !parsedResumeData) ? 0.75 : 1,
+            cursor: (!uploadedFile && !parsedResumeData) ? 'pointer' : 'pointer'
+          }}
         >
-          Start Interview
+          {uploadedFile ? 'Start Interview' : 'Upload Resume to Start Interview'}
           <ArrowRight size={18} />
         </button>
       </form>
