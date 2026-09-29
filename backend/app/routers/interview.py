@@ -24,6 +24,7 @@ from ..services.ai_service import (
     evaluate_answer,
     generate_final_report
 )
+from ..services.google_sheets_service import sync_report_to_google_sheets
 
 router = APIRouter(prefix="/api/interview", tags=["Interview"])
 
