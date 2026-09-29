@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import RobotAvatar from '../components/RobotAvatar';
-import { INTERVIEWER_PERSONAS } from '../components/InterviewerFace';
 import { Sparkles, Code2, FolderGit2, GraduationCap, Briefcase, Award, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { analyzeResume } from '../services/api';
 
@@ -54,7 +53,7 @@ export default function ResumeAnalysisPage({ setupConfig, onStartLiveInterview }
   const education = extractedData?.education || [{
     degree: 'B.Tech in Computer Science & Engineering',
     institution: 'National Institute of Technology',
-    year: '2024'
+    year: '2025'
   }];
   const internships = extractedData?.internships || [{
     role: 'Computer Vision Intern',
@@ -66,55 +65,26 @@ export default function ResumeAnalysisPage({ setupConfig, onStartLiveInterview }
     'TensorFlow Developer Certificate'
   ];
 
-  const currentPersona = INTERVIEWER_PERSONAS.find(p => p.id === setupConfig?.interviewerPersona) || INTERVIEWER_PERSONAS[0];
-
   return (
     <div className="container" style={{ padding: '30px 24px 80px', maxWidth: '960px' }}>
-      {/* Top Status & Interviewer Face Animation */}
+      {/* Top Status & Mockora Cyber AI Robot Avatar Animation */}
       <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-        {currentPersona.id === 'robot' ? (
-          <RobotAvatar status={isAnalyzing ? 'thinking' : 'idle'} size={240} showStatusBadge={false} />
-        ) : (
-          <div style={{
-            width: '140px',
-            height: '140px',
-            margin: '0 auto',
-            position: 'relative',
-            borderRadius: '50%',
-            padding: '4px',
-            background: 'linear-gradient(135deg, #00f0ff, #a855f7)',
-            boxShadow: isAnalyzing ? '0 0 30px rgba(0, 240, 255, 0.4)' : 'none'
-          }}>
-            <img
-              src={currentPersona.image}
-              alt={currentPersona.name}
-              style={{
-                width: '100%',
-                height: '100%',
-                borderRadius: '50%',
-                objectFit: 'cover'
-              }}
-            />
-            {isAnalyzing && (
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: '50%',
-                border: '2px dashed #00f0ff',
-                animation: 'rotateSlow 6s linear infinite'
-              }} />
-            )}
-          </div>
-        )}
+        <RobotAvatar status={isAnalyzing ? 'thinking' : 'idle'} size={240} showStatusBadge={false} />
 
         <div style={{ marginTop: '20px' }}>
           {isAnalyzing ? (
             <>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span className="badge-cyber" style={{ fontSize: '11px' }}>
+                  <Sparkles size={13} />
+                  Mockora Cyber AI • Humanoid AI Engine
+                </span>
+              </div>
               <h1 style={{ fontSize: '28px', color: '#f8fafc', marginBottom: '8px' }}>
                 Analyzing your resume...
               </h1>
               <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '16px' }}>
-                Mockora is parsing your projects, core technologies, and domain experience.
+                Mockora is parsing your projects, core technologies, and domain experience to build adaptive questions.
               </p>
 
               {/* Progress Bar */}
@@ -145,7 +115,7 @@ export default function ResumeAnalysisPage({ setupConfig, onStartLiveInterview }
                 </span>
               </div>
               <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '20px' }}>
-                Mockora has calibrated questions tailored to your resume for the <strong style={{ color: '#38bdf8' }}>{setupConfig.role}</strong> role.
+                Mockora Cyber AI has calibrated questions tailored to your resume for the <strong style={{ color: '#38bdf8' }}>{setupConfig.role}</strong> role.
               </p>
 
               <button
@@ -153,7 +123,7 @@ export default function ResumeAnalysisPage({ setupConfig, onStartLiveInterview }
                 className="btn-primary"
                 style={{ padding: '14px 40px', fontSize: '16px', boxShadow: '0 0 25px rgba(0, 240, 255, 0.4)' }}
               >
-                Start Interview
+                Start Interview Session
                 <ArrowRight size={18} />
               </button>
             </>
@@ -240,7 +210,7 @@ export default function ResumeAnalysisPage({ setupConfig, onStartLiveInterview }
         </div>
 
         {/* Card 5: Certifications */}
-        <div className="cyber-card" style={{ padding: '24px', gridColumn: 'span 1' }}>
+        <div className="cyber-card" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
             <Award size={20} color="#00f0ff" />
             <h3 style={{ fontSize: '16px', color: '#f8fafc' }}>Certifications</h3>
