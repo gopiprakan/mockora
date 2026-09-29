@@ -36,14 +36,14 @@ export default function App() {
         interview_type: setupConfig.interviewType,
         difficulty: setupConfig.difficulty,
         duration_minutes: setupConfig.durationMinutes,
-        interviewer_persona: setupConfig.interviewerPersona || 'sarah',
+        interviewer_persona: setupConfig.interviewerPersona || 'robot',
         resume_data: resumeData
       };
 
       const res = await startInterviewSession(payload);
       setSessionData({
         ...res.session,
-        interviewer_persona: setupConfig.interviewerPersona || res.session?.interviewer_persona || 'sarah'
+        interviewer_persona: setupConfig.interviewerPersona || res.session?.interviewer_persona || 'robot'
       });
       setInitialQuestion(res.question);
       setCurrentView('interview');
@@ -58,7 +58,7 @@ export default function App() {
         interview_type: setupConfig.interviewType,
         difficulty: setupConfig.difficulty,
         duration_minutes: setupConfig.durationMinutes,
-        interviewer_persona: setupConfig.interviewerPersona || 'sarah'
+        interviewer_persona: setupConfig.interviewerPersona || 'robot'
       };
       const primaryProject = resumeData?.projects?.[0]?.name || "AI Smart Traffic Management System";
       const fallbackQuestion = {
