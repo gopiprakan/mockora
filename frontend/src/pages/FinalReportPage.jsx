@@ -3,20 +3,25 @@ import confetti from 'canvas-confetti';
 import EmailModal from '../components/EmailModal';
 import { 
   Award, Mail, Printer, RotateCcw, CheckCircle2, AlertTriangle, 
-  BookOpen, MessageSquare, Sparkles, ChevronDown, ChevronUp, BarChart2, Check, ArrowRight, ShieldCheck
+  BookOpen, MessageSquare, Sparkles, ChevronDown, ChevronUp, BarChart2, Check, ArrowRight, ShieldCheck, AlertCircle
 } from 'lucide-react';
 
 export default function FinalReportPage({ report, onPracticeAgain, onNavigateDashboard }) {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [expandedQuestions, setExpandedQuestions] = useState({});
 
+  const overallScore = report?.overall_score !== undefined ? report.overall_score : 0;
+
   useEffect(() => {
-    confetti({
-      particleCount: 90,
-      spread: 80,
-      origin: { y: 0.6 }
-    });
-  }, []);
+    // Only fire celebratory confetti if candidate scored 60+
+    if (overallScore >= 60) {
+      confetti({
+        particleCount: 90,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+    }
+  }, [overallScore]);
 
   const toggleQuestion = (idx) => {
     setExpandedQuestions(prev => ({
@@ -25,24 +30,28 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
     }));
   };
 
-  const overallScore = report?.overall_score || 82;
   const categories = report?.category_scores || {
-    "Technical Knowledge": 84,
-    "Problem Solving": 85,
-    "Communication & Fluency": 78,
-    "Answer Relevance": 88,
-    "Answer Structure": 76
+    "Technical Knowledge": overallScore,
+    "Problem Solving": overallScore,
+    "Communication": overallScore,
+    "Answer Relevance": overallScore,
+    "Answer Structure": overallScore
   };
-  const strengths = report?.strengths || [
-    "Good understanding of programming concepts and architectural components",
+  const strengths = report?.strengths || (overallScore >= 70 ? [
+    "Demonstrated good command of core programming concepts",
     "Relevant project explanations tied directly to the problem domain",
     "Logical problem-solving approach to edge case handling"
-  ];
-  const improvements = report?.areas_to_improve || [
+  ] : [
+    "Participated in the live technical interview session"
+  ]);
+  const improvements = report?.areas_to_improve || (overallScore >= 70 ? [
     "Give more real-world quantitative examples and production trade-offs",
-    "Structure complex answers using the STAR method (Situation, Task, Action, Result)",
-    "Deepen explanation of database query optimization and error recovery"
-  ];
+    "Structure complex answers using the STAR method (Situation, Task, Action, Result)"
+  ] : [
+    "Requires substantial preparation in foundational data structures, algorithms, and system design",
+    "Provide complete and specific technical explanations instead of one-line answers",
+    "Practice speaking clearly about past project architectures and problem-solving steps"
+  ]);
   const topics = report?.recommended_topics || [
     "SQL Indexing & Query Plans",
     "OOP & SOLID Principles",
@@ -53,9 +62,18 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
     camera_engagement: "Good",
     long_pauses: 2,
     filler_words: 4,
-    average_response_time: "3.8 seconds"
+    average_response_time: "3.8s"
   };
   const questionsAnalysis = report?.questions_analysis || [];
+
+  const getScoreBadge = (score) => {
+    if (score >= 85) return { label: '✓ Placement Ready (Top 10%)', cls: 'badge-green' };
+    if (score >= 70) return { label: '✓ Competent / Solid Foundation', cls: 'badge-cyber' };
+    if (score >= 50) return { label: '⚠ Developing — Needs Technical Depth', cls: 'badge-amber' };
+    return { label: '⚠ Needs Significant Preparation', cls: 'badge-amber' };
+  };
+
+  const badgeInfo = getScoreBadge(overallScore);
 
   return (
     <div className="container" style={{ padding: '36px 20px 80px', maxWidth: '1080px' }}>
@@ -136,8 +154,8 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
           alignItems: 'center',
           justifyContent: 'center',
           background: 'radial-gradient(circle at 50% 40%, rgba(13, 22, 42, 0.98) 0%, rgba(6, 9, 19, 0.99) 100%)',
-          border: '1px solid rgba(0, 240, 255, 0.4)',
-          boxShadow: '0 0 40px rgba(0, 240, 255, 0.18)',
+          border: `1px solid ${overallScore >= 70 ? 'rgba(0, 240, 255, 0.4)' : overallScore >= 50 ? 'rgba(245, 158, 11, 0.4)' : 'rgba(244, 63, 94, 0.4)'}`,
+          boxShadow: overallScore >= 70 ? '0 0 40px rgba(0, 240, 255, 0.18)' : '0 0 30px rgba(0, 0, 0, 0.4)',
           position: 'relative'
         }}>
           <div className="hud-corner-tl" />
@@ -146,7 +164,7 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
           <div className="hud-corner-br" />
 
           <div style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: '800', marginBottom: '8px' }}>
-            Overall Practice Score
+            Overall Performance Score
           </div>
 
           <div style={{
@@ -154,7 +172,11 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
             fontFamily: 'var(--font-heading)',
             fontWeight: '900',
             lineHeight: '1',
-            background: 'linear-gradient(135deg, #00f0ff 0%, #38bdf8 50%, #a855f7 100%)',
+            background: overallScore >= 70
+              ? 'linear-gradient(135deg, #00f0ff 0%, #38bdf8 50%, #a855f7 100%)'
+              : overallScore >= 50
+              ? 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'
+              : 'linear-gradient(135deg, #f87171 0%, #f43f5e 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             margin: '12px 0'
@@ -163,13 +185,13 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
           </div>
 
           <div style={{ marginBottom: '12px' }}>
-            <span className={overallScore >= 80 ? "badge-green" : overallScore >= 60 ? "badge-cyber" : "badge-amber"} style={{ fontSize: '12px', padding: '4px 14px' }}>
-              {overallScore >= 80 ? '✓ Placement Ready' : overallScore >= 60 ? 'Competent Foundation' : 'Needs Practice'}
+            <span className={badgeInfo.cls} style={{ fontSize: '12px', padding: '5px 16px' }}>
+              {badgeInfo.label}
             </span>
           </div>
 
           <p style={{ fontSize: '13px', color: '#94a3b8', maxWidth: '300px', lineHeight: '1.5' }}>
-            AI-calibrated score measuring technical domain mastery, problem-solving flow, and articulate delivery.
+            Strict merit-based evaluation calculated from your actual answer accuracy, technical depth, and communication.
           </p>
         </div>
 
@@ -187,19 +209,17 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
               <div key={catName}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
                   <span style={{ color: '#cbd5e1', fontWeight: '600' }}>{catName}</span>
-                  <span style={{ color: '#00f0ff', fontWeight: '800', fontFamily: 'var(--font-mono)' }}>{scoreVal}%</span>
+                  <span style={{ color: scoreVal >= 70 ? '#00f0ff' : scoreVal >= 50 ? '#f59e0b' : '#f87171', fontWeight: '800', fontFamily: 'var(--font-mono)' }}>{scoreVal}%</span>
                 </div>
                 <div style={{ width: '100%', height: '8px', background: '#0a0f1e', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(56, 189, 248, 0.18)' }}>
                   <div style={{
                     width: `${scoreVal}%`,
                     height: '100%',
-                    background: catName.includes('Technical')
+                    background: scoreVal >= 70
                       ? 'linear-gradient(90deg, #0284c7, #00f0ff)'
-                      : catName.includes('Problem')
-                      ? 'linear-gradient(90deg, #8b5cf6, #c084fc)'
-                      : catName.includes('Relevance')
-                      ? 'linear-gradient(90deg, #059669, #34d399)'
-                      : 'linear-gradient(90deg, #0284c7, #38bdf8)',
+                      : scoreVal >= 50
+                      ? 'linear-gradient(90deg, #d97706, #f59e0b)'
+                      : 'linear-gradient(90deg, #dc2626, #f87171)',
                     borderRadius: '4px',
                     transition: 'width 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
                   }} />
@@ -221,7 +241,7 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
         <div className="cyber-card" style={{ padding: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
             <CheckCircle2 size={22} color="#10b981" />
-            <h3 style={{ fontSize: '18px', color: '#10b981' }}>Key Strengths</h3>
+            <h3 style={{ fontSize: '18px', color: '#10b981' }}>Identified Strengths</h3>
           </div>
           <ul style={{ paddingLeft: '20px', margin: 0, color: '#cbd5e1', fontSize: '14px', lineHeight: '1.7' }}>
             {strengths.map((str, idx) => (
@@ -234,7 +254,7 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
         <div className="cyber-card" style={{ padding: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
             <AlertTriangle size={22} color="#f59e0b" />
-            <h3 style={{ fontSize: '18px', color: '#f59e0b' }}>Areas to Improve</h3>
+            <h3 style={{ fontSize: '18px', color: '#f59e0b' }}>Key Areas to Improve</h3>
           </div>
           <ul style={{ paddingLeft: '20px', margin: 0, color: '#cbd5e1', fontSize: '14px', lineHeight: '1.7' }}>
             {improvements.map((imp, idx) => (
@@ -258,7 +278,7 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
             <h3 style={{ fontSize: '18px', color: '#f8fafc' }}>Recommended Topics</h3>
           </div>
           <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '14px' }}>
-            Focus your revision on these core concepts to excel in your upcoming technical rounds:
+            Target your study sessions on these core concepts to excel in your technical rounds:
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {topics.map((t, idx) => (
@@ -317,7 +337,7 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
             Question-by-Question Analysis
           </h2>
           <p style={{ color: '#94a3b8', fontSize: '14px' }}>
-            Review your answers, AI critique, and benchmark model responses.
+            Detailed breakdown of individual question scores, AI critique, and benchmark model answers.
           </p>
         </div>
 
@@ -329,6 +349,9 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
           <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             {questionsAnalysis.map((item, idx) => {
               const isExpanded = expandedQuestions[idx] !== false;
+              const numericScore = parseInt(item.score, 10) || 0;
+              const scoreBadgeCls = numericScore >= 75 ? 'badge-green' : numericScore >= 50 ? 'badge-amber' : 'badge-amber';
+              
               return (
                 <div key={idx} className="cyber-card" style={{ padding: '26px' }}>
                   {/* Question Header Bar */}
@@ -346,7 +369,7 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <span className="badge-green" style={{ fontSize: '13px' }}>
+                      <span className={scoreBadgeCls} style={{ fontSize: '13px' }}>
                         Score: {item.score}
                       </span>
                       {isExpanded ? <ChevronUp size={20} color="#94a3b8" /> : <ChevronDown size={20} color="#94a3b8" />}
@@ -369,7 +392,7 @@ export default function FinalReportPage({ report, onPracticeAgain, onNavigateDas
                           fontSize: '14px',
                           lineHeight: '1.6'
                         }}>
-                          "{item.student_answer}"
+                          "{item.student_answer || 'No answer recorded'}"
                         </p>
                       </div>
 
