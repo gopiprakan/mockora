@@ -23,11 +23,11 @@ export default function DashboardPage({ onStartNewInterview, onViewReport }) {
 
   const totalInterviews = reports.length;
   const avgScore = totalInterviews > 0
-    ? Math.round(reports.reduce((acc, r) => acc + (r.overall_score || 0), 0) / totalInterviews)
-    : 82;
+    ? Math.round(reports.reduce((acc, r) => acc + (r.overall_score !== undefined ? r.overall_score : 0), 0) / totalInterviews)
+    : 0;
   const maxScore = totalInterviews > 0
-    ? Math.max(...reports.map(r => r.overall_score || 0))
-    : 85;
+    ? Math.max(...reports.map(r => r.overall_score !== undefined ? r.overall_score : 0))
+    : 0;
 
   return (
     <div className="container" style={{ padding: '36px 20px 80px', maxWidth: '1080px' }}>
