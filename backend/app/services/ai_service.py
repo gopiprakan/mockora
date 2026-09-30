@@ -13,9 +13,11 @@ async def call_gemini(prompt: str, system_instruction: str = "") -> Optional[str
     
     # Priority ordered list of models to try
     candidate_models = []
-    for m in [settings.GEMINI_MODEL, "gemini-1.5-flash", "gemini-1.5-pro", "gemini-flash-latest", "gemini-2.0-flash"]:
-        if m and m not in candidate_models:
-            candidate_models.append(m)
+    default_models = [settings.GEMINI_MODEL, "gemini-3.1-flash-lite", "gemini-3.7-flash", "gemini-3.8-flash", "gemini-flash-latest"]
+    for m in default_models:
+        clean_m = m.replace("models/", "") if m else ""
+        if clean_m and clean_m not in candidate_models:
+            candidate_models.append(clean_m)
             
     payload = {
         "contents": [
