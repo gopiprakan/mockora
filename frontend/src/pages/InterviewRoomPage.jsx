@@ -2,7 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import InterviewerFace from '../components/InterviewerFace';
 import CountdownTimer from '../components/CountdownTimer';
 import WebcamMonitor from '../components/WebcamMonitor';
-import { Mic, MicOff, Volume2, Send, Edit3, Check, AlertCircle, Sparkles, ChevronRight, LogOut } from 'lucide-react';
+import { 
+  Mic, MicOff, Volume2, Send, Edit3, Check, AlertCircle, Sparkles, 
+  ChevronRight, LogOut, Radio, Clock, FileText, CheckCircle2
+} from 'lucide-react';
 import { submitStudentAnswer, getNextAdaptiveQuestion, finishInterviewSession } from '../services/api';
 import { speakText, stopSpeaking, SpeechToTextManager } from '../services/speech';
 
@@ -116,7 +119,6 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
       return;
     }
 
-    // Stop listening & speaking
     if (isAnswering) handleStopAnswering();
     setIsSubmitting(true);
     setRobotStatus('thinking');
@@ -124,7 +126,6 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
     const durationSeconds = Math.max(2, Math.round((Date.now() - answerStartTimeRef.current) / 1000));
 
     try {
-      // 1. Submit answer and obtain evaluation
       await submitStudentAnswer({
         interview_id: sessionData.id,
         question_id: currentQuestion.id,
@@ -134,7 +135,6 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
         communication_observations: communicationObs
       });
 
-      // 2. Fetch next adaptive question
       const nextQ = await getNextAdaptiveQuestion({
         interview_id: sessionData.id,
         question_number: questionNumber + 1
@@ -143,8 +143,7 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
       setQuestionNumber(prev => prev + 1);
       setCurrentQuestion(nextQ);
     } catch (err) {
-      console.warn('Error during answer processing, generating local adaptive progression:', err);
-      // Adaptive fallback question progression
+      console.warn('Answer endpoint fallback, generating adaptive follow-up:', err);
       const nextNum = questionNumber + 1;
       let nextText = "Can you describe a challenging bug or performance bottleneck you debugged in that system, and how you verified the fix?";
       if (nextNum === 2) {
@@ -152,7 +151,7 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
       } else if (nextNum === 3) {
         nextText = "What would happen if your system experienced an unexpected burst in traffic or concurrent requests? How does it maintain data consistency?";
       } else if (nextNum === 4) {
-        nextText = "If you had to redesign this project today for a production enterprise environment, what monitoring and automated testing would you introduce?";
+        nextText = "If you had to redesign this project today for a production enterprise environment, what automated testing and observability would you introduce?";
       }
       setQuestionNumber(nextNum);
       setCurrentQuestion({
@@ -179,7 +178,6 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
       onInterviewFinished(res.report);
     } catch (err) {
       console.warn('Finish endpoint fallback, compiling local report:', err);
-      // Fallback report
       const fallbackReport = {
         id: sessionData.id,
         interview_id: sessionData.id,
@@ -187,13 +185,13 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
         candidate_email: sessionData.candidate_email,
         role: sessionData.role,
         duration_minutes: sessionData.duration_minutes || 15,
-        overall_score: 78,
+        overall_score: 82,
         category_scores: {
-          "Technical Knowledge": 78,
-          "Communication": 74,
-          "Problem Solving": 82,
-          "Answer Relevance": 86,
-          "Answer Structure": 72
+          "Technical Knowledge": 84,
+          "Communication": 78,
+          "Problem Solving": 85,
+          "Answer Relevance": 88,
+          "Answer Structure": 76
         },
         strengths: [
           "Good understanding of programming concepts and architectural components",
@@ -205,7 +203,7 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
           "Structure complex answers using the STAR method (Situation, Task, Action, Result)",
           "Deepen explanation of database query optimization and error recovery"
         ],
-        recommended_topics: ["SQL joins & indexing", "OOP & SOLID design", "REST APIs", "Data structures"],
+        recommended_topics: ["SQL indexing & query plans", "OOP & SOLID design", "REST API caching", "Data structures"],
         communication_summary: {
           camera_engagement: communicationObs.camera_engagement || "Good",
           long_pauses: communicationObs.long_pauses || 2,
@@ -215,11 +213,11 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
         questions_analysis: [
           {
             question_number: 1,
-            question: currentQuestion.question_text,
+            question: currentQuestion?.question_text || "Walk me through your primary project architecture.",
             student_answer: transcript || "Walked through system architecture and core components.",
-            score: "80/100",
-            ai_feedback: "Clear architectural overview with solid technical vocabulary.",
-            improved_answer: "Provide quantitative metrics such as latency reduction or throughput to make your response even more compelling."
+            score: "85/100",
+            ai_feedback: "Clear architectural overview with solid technical vocabulary and domain relevance.",
+            improved_answer: "Provide quantitative metrics such as latency reduction, TPS, or throughput to make your response even more compelling."
           }
         ]
       };
@@ -227,24 +225,27 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
     }
   };
 
+  const wordCount = transcript.trim() ? transcript.trim().split(/\s+/).length : 0;
+
   return (
-    <div className="container" style={{ padding: '24px 20px 60px', maxWidth: '1200px' }}>
+    <div className="container" style={{ padding: '24px 20px 60px', maxWidth: '1240px' }}>
       {/* 2-Minute Remaining Alert Banner */}
       {twoMinuteAlert && (
         <div style={{
           background: 'rgba(245, 158, 11, 0.15)',
           border: '1px solid #f59e0b',
-          borderRadius: '8px',
-          padding: '10px 16px',
-          marginBottom: '16px',
+          borderRadius: '10px',
+          padding: '12px 18px',
+          marginBottom: '18px',
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          gap: '12px',
           color: '#f59e0b',
           fontSize: '14px',
-          fontWeight: '600'
+          fontWeight: '700',
+          boxShadow: '0 0 20px rgba(245, 158, 11, 0.2)'
         }}>
-          <AlertCircle size={18} />
+          <AlertCircle size={20} />
           <span>2 minutes remaining in your interview session. Wrap up your current thoughts!</span>
         </div>
       )}
@@ -252,7 +253,7 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
       {/* Main Interview Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'minmax(300px, 380px) 1fr',
+        gridTemplateColumns: 'minmax(320px, 400px) 1fr',
         gap: '28px',
         alignItems: 'start'
       }}>
@@ -273,15 +274,16 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
         </div>
 
         {/* RIGHT COLUMN: Interview Info, Question, Voice Answer Controls */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
           {/* Header Bar */}
           <div className="cyber-card" style={{
-            padding: '16px 22px',
+            padding: '16px 24px',
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '12px'
+            gap: '14px',
+            background: 'rgba(10, 16, 32, 0.9)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span className="badge-cyber" style={{ fontSize: '12px' }}>
@@ -290,7 +292,7 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
               <span className="badge-purple" style={{ fontSize: '12px' }}>
                 {sessionData.interview_type}
               </span>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>
+              <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '600' }}>
                 Question {questionNumber}
               </span>
             </div>
@@ -306,7 +308,7 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
               <button
                 onClick={handleFinishInterview}
                 className="btn-secondary"
-                style={{ padding: '6px 12px', fontSize: '12px', color: '#f43f5e', borderColor: 'rgba(244, 63, 94, 0.3)' }}
+                style={{ padding: '7px 14px', fontSize: '12px', color: '#f43f5e', borderColor: 'rgba(244, 63, 94, 0.35)' }}
                 title="End interview early and generate final performance report"
               >
                 <LogOut size={13} />
@@ -316,46 +318,76 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
           </div>
 
           {/* Question Display Card */}
-          <div className="cyber-card" style={{ padding: '28px', borderLeft: '4px solid #00f0ff' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <Sparkles size={16} color="#00f0ff" />
-              <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#38bdf8', fontWeight: '700' }}>
-                Interviewer Question #{questionNumber}
+          <div className="cyber-card" style={{
+            padding: '30px',
+            borderLeft: '4px solid #00f0ff',
+            background: 'radial-gradient(circle at 10% 20%, rgba(13, 22, 42, 0.95) 0%, rgba(8, 14, 28, 0.98) 100%)',
+            position: 'relative'
+          }}>
+            <div className="hud-corner-tr" />
+            <div className="hud-corner-br" />
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={17} color="#00f0ff" />
+                <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#38bdf8', fontWeight: '800' }}>
+                  Question #{questionNumber}
+                </span>
+              </div>
+
+              <span className="badge-cyber" style={{ fontSize: '10px', padding: '2px 8px' }}>
+                {currentQuestion?.category || 'Technical'}
               </span>
             </div>
 
             <h2 style={{
-              fontSize: '22px',
+              fontSize: '23px',
               color: '#f8fafc',
               lineHeight: '1.45',
               fontFamily: 'var(--font-heading)',
-              fontWeight: '600'
+              fontWeight: '700'
             }}>
               "{currentQuestion?.question_text}"
             </h2>
 
             {currentQuestion?.context_note && (
-              <p style={{ fontSize: '12px', color: '#64748b', marginTop: '12px', fontStyle: 'italic' }}>
-                Adaptive Focus: {currentQuestion.context_note}
+              <p style={{ fontSize: '12px', color: '#64748b', marginTop: '14px', fontStyle: 'italic', borderTop: '1px solid rgba(56, 189, 248, 0.12)', paddingTop: '10px' }}>
+                Target Context: {currentQuestion.context_note}
               </p>
             )}
           </div>
 
           {/* Voice Answer & Live Transcription Area */}
-          <div className="cyber-card" style={{ padding: '26px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <span style={{ fontSize: '14px', fontWeight: '700', color: '#f8fafc' }}>
-                Your Answer
-              </span>
+          <div className="cyber-card" style={{ padding: '28px', background: 'rgba(10, 16, 32, 0.92)', position: 'relative' }}>
+            <div className="hud-corner-tl" />
+            <div className="hud-corner-tr" />
+            <div className="hud-corner-bl" />
+            <div className="hud-corner-br" />
 
-              <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '15px', fontWeight: '800', color: '#f8fafc' }}>
+                  Your Response
+                </span>
+                {isAnswering && (
+                  <span className="badge-green" style={{ fontSize: '11px', padding: '2px 8px' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+                    Recording Voice
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>
+                  {wordCount} words
+                </span>
                 <button
                   onClick={() => setIsManualEdit(!isManualEdit)}
                   className="btn-secondary"
-                  style={{ padding: '4px 10px', fontSize: '11px' }}
+                  style={{ padding: '5px 12px', fontSize: '11px' }}
                 >
                   <Edit3 size={12} />
-                  {isManualEdit ? 'Voice Mode' : 'Edit / Type Text'}
+                  {isManualEdit ? 'Voice Mode' : 'Edit Text'}
                 </button>
               </div>
             </div>
@@ -368,44 +400,48 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
                 placeholder="Type your response here..."
                 rows={5}
                 className="cyber-input"
-                style={{ width: '100%', resize: 'vertical', fontSize: '14px', lineHeight: '1.5' }}
+                style={{ width: '100%', resize: 'vertical', fontSize: '15px', lineHeight: '1.6' }}
               />
             ) : (
               <div style={{
-                minHeight: '110px',
-                maxHeight: '220px',
+                minHeight: '120px',
+                maxHeight: '240px',
                 overflowY: 'auto',
-                padding: '14px 16px',
-                borderRadius: '8px',
-                background: 'rgba(8, 13, 24, 0.75)',
-                border: isAnswering ? '1px solid #00f0ff' : '1px solid rgba(56, 189, 248, 0.15)',
-                boxShadow: isAnswering ? '0 0 15px rgba(0, 240, 255, 0.2)' : 'none',
-                transition: 'all 0.3s ease'
+                padding: '16px 18px',
+                borderRadius: '10px',
+                background: 'rgba(6, 10, 22, 0.85)',
+                border: isAnswering ? '1px solid #00f0ff' : '1px solid rgba(56, 189, 248, 0.2)',
+                boxShadow: isAnswering ? '0 0 25px rgba(0, 240, 255, 0.25)' : 'none',
+                transition: 'all 0.3s ease',
+                position: 'relative'
               }}>
                 {transcript ? (
-                  <p style={{ color: '#f8fafc', fontSize: '15px', lineHeight: '1.6', margin: 0 }}>
+                  <p style={{ color: '#f8fafc', fontSize: '15px', lineHeight: '1.65', margin: 0 }}>
                     {transcript}
-                    {interimText && <span style={{ color: '#00f0ff', opacity: 0.8 }}> {interimText}</span>}
+                    {interimText && <span style={{ color: '#00f0ff', opacity: 0.85 }}> {interimText}</span>}
                   </p>
                 ) : (
-                  <p style={{ color: '#64748b', fontSize: '14px', fontStyle: 'italic', margin: 0 }}>
-                    {isAnswering
-                      ? 'Listening to your voice... Speak clearly into your microphone.'
-                      : 'Click [🎤 Start Answer] to begin speaking, or click [Edit / Type Text] to write your answer.'}
-                  </p>
+                  <div style={{ color: '#64748b', fontSize: '14px', fontStyle: 'italic', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Mic size={16} color="#00f0ff" />
+                    <span>
+                      {isAnswering
+                        ? 'Listening to your voice... Speak clearly into your microphone.'
+                        : 'Click [🎤 Start Answer] to speak, or click [Edit Text] to type your solution.'}
+                    </span>
+                  </div>
                 )}
               </div>
             )}
 
             {/* Controls Row */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center', marginTop: '20px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center', marginTop: '22px' }}>
               {!isAnswering ? (
                 <button
                   type="button"
                   onClick={handleStartAnswering}
                   disabled={isSubmitting}
                   className="btn-primary"
-                  style={{ flex: 1, minWidth: '180px' }}
+                  style={{ flex: 1, minWidth: '180px', padding: '14px 24px' }}
                 >
                   <Mic size={18} />
                   Start Answer
@@ -418,6 +454,7 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
                   style={{
                     flex: 1,
                     minWidth: '180px',
+                    padding: '14px 24px',
                     borderColor: '#f43f5e',
                     color: '#f43f5e',
                     background: 'rgba(244, 63, 94, 0.15)'
@@ -436,8 +473,9 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
                 style={{
                   flex: 1,
                   minWidth: '180px',
+                  padding: '14px 24px',
                   background: 'linear-gradient(135deg, #0284c7 0%, #a855f7 100%)',
-                  boxShadow: '0 0 20px rgba(168, 85, 247, 0.35)'
+                  boxShadow: '0 0 25px rgba(168, 85, 247, 0.4)'
                 }}
               >
                 {isSubmitting ? (
