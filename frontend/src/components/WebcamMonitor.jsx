@@ -39,11 +39,10 @@ export default function WebcamMonitor({
       timerRef.current = setInterval(() => {
         setSpeakingDuration(prev => prev + 1);
 
-        // Check if there hasn't been new words in last 4.5 seconds
         const gap = (Date.now() - lastSpeechTimeRef.current) / 1000;
         if (gap > 4.5) {
           setLongPauses(prev => prev + 1);
-          lastSpeechTimeRef.current = Date.now(); // reset to avoid continuous count
+          lastSpeechTimeRef.current = Date.now();
         }
       }, 1000);
     } else {
@@ -111,12 +110,17 @@ export default function WebcamMonitor({
   }, []);
 
   return (
-    <div className="cyber-card" style={{ padding: '16px', background: 'rgba(10, 16, 30, 0.85)', marginTop: '16px' }}>
+    <div className="cyber-card" style={{ padding: '18px', background: 'rgba(10, 16, 32, 0.9)', marginTop: '18px', position: 'relative' }}>
+      <div className="hud-corner-tl" />
+      <div className="hud-corner-tr" />
+      <div className="hud-corner-bl" />
+      <div className="hud-corner-br" />
+
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Activity size={17} color="#00f0ff" />
-          <span style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#94a3b8' }}>
-            Candidate Video & Signals
+          <span style={{ fontSize: '12px', fontWeight: '700', letterSpacing: '0.06em', textTransform: 'uppercase', color: '#94a3b8' }}>
+            Candidate Signals HUD
           </span>
         </div>
 
@@ -124,7 +128,7 @@ export default function WebcamMonitor({
           onClick={toggleCamera}
           className="btn-secondary"
           style={{
-            padding: '5px 12px',
+            padding: '6px 14px',
             fontSize: '11px',
             borderRadius: '6px',
             display: 'flex',
@@ -135,20 +139,20 @@ export default function WebcamMonitor({
           title={cameraActive ? 'Turn off candidate camera' : 'Enable candidate camera for visual engagement feedback'}
         >
           {cameraActive ? <CameraOff size={13} color="#f43f5e" /> : <Camera size={13} color="#00f0ff" />}
-          <span>{cameraActive ? 'Turn Camera Off' : 'Enable Camera'}</span>
+          <span>{cameraActive ? 'Camera Off' : 'Enable Camera'}</span>
         </button>
       </div>
 
-      {/* Video Feed Preview Frame (Always structured with video or preview avatar) */}
+      {/* Video Feed Preview Frame */}
       <div style={{
         position: 'relative',
         width: '100%',
-        height: '150px',
-        borderRadius: '10px',
+        height: '160px',
+        borderRadius: '12px',
         overflow: 'hidden',
         background: '#020617',
-        marginBottom: '12px',
-        border: cameraActive ? '1px solid rgba(0, 240, 255, 0.4)' : '1px dashed rgba(56, 189, 248, 0.25)',
+        marginBottom: '14px',
+        border: cameraActive ? '1px solid rgba(0, 240, 255, 0.45)' : '1px dashed rgba(56, 189, 248, 0.25)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
@@ -165,23 +169,17 @@ export default function WebcamMonitor({
 
             {/* Live Camera HUD Overlay */}
             <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', gap: '6px' }}>
-              <span className="badge-cyber" style={{ fontSize: '10px', padding: '2px 8px', background: 'rgba(2, 6, 23, 0.85)' }}>
+              <span className="badge-cyber" style={{ fontSize: '10px', padding: '2px 8px', background: 'rgba(2, 6, 23, 0.9)' }}>
                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f0ff', display: 'inline-block' }} />
                 Face In Frame
               </span>
             </div>
 
             <div style={{ position: 'absolute', bottom: '8px', right: '8px' }}>
-              <span className="badge-green" style={{ fontSize: '10px', padding: '2px 8px', background: 'rgba(2, 6, 23, 0.85)' }}>
+              <span className="badge-green" style={{ fontSize: '10px', padding: '2px 8px', background: 'rgba(2, 6, 23, 0.9)' }}>
                 Engagement: {cameraEngagement}
               </span>
             </div>
-
-            {/* Corner Targeting Reticle */}
-            <div style={{ position: 'absolute', top: '6px', left: '6px', width: '8px', height: '8px', borderTop: '2px solid #00f0ff', borderLeft: '2px solid #00f0ff' }} />
-            <div style={{ position: 'absolute', top: '6px', right: '6px', width: '8px', height: '8px', borderTop: '2px solid #00f0ff', borderRight: '2px solid #00f0ff' }} />
-            <div style={{ position: 'absolute', bottom: '6px', left: '6px', width: '8px', height: '8px', borderBottom: '2px solid #00f0ff', borderLeft: '2px solid #00f0ff' }} />
-            <div style={{ position: 'absolute', bottom: '6px', right: '6px', width: '8px', height: '8px', borderBottom: '2px solid #00f0ff', borderRight: '2px solid #00f0ff' }} />
           </>
         ) : (
           <div style={{
@@ -195,23 +193,23 @@ export default function WebcamMonitor({
             color: '#64748b'
           }}>
             <div style={{
-              width: '44px',
-              height: '44px',
+              width: '46px',
+              height: '46px',
               borderRadius: '50%',
-              background: 'rgba(15, 23, 42, 0.8)',
-              border: '1px solid rgba(56, 189, 248, 0.2)',
+              background: 'rgba(15, 23, 42, 0.85)',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <User size={22} color="#94a3b8" />
+              <User size={24} color="#94a3b8" />
             </div>
             <div>
-              <div style={{ fontSize: '12px', fontWeight: '600', color: '#94a3b8' }}>
-                Your Video Feed is Off
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8' }}>
+                Video Feed Standby
               </div>
               <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>
-                Click <span style={{ color: '#00f0ff' }}>"Enable Camera"</span> above to practice with eye contact tracking
+                Click <span style={{ color: '#00f0ff' }}>"Enable Camera"</span> to analyze eye contact
               </div>
             </div>
           </div>
@@ -220,21 +218,21 @@ export default function WebcamMonitor({
 
       {/* Metrics Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', textAlign: 'center' }}>
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px 6px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
+        <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '10px 6px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
           <div style={{ fontSize: '11px', color: '#64748b' }}>Camera Gaze</div>
           <div style={{ fontSize: '13px', fontWeight: '700', color: '#38bdf8', marginTop: '2px' }}>
             {cameraActive ? cameraEngagement : 'Audio Mode'}
           </div>
         </div>
 
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px 6px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
+        <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '10px 6px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
           <div style={{ fontSize: '11px', color: '#64748b' }}>Filler Words</div>
           <div style={{ fontSize: '13px', fontWeight: '700', color: fillerCount > 5 ? '#f59e0b' : '#10b981', marginTop: '2px' }}>
             {fillerCount}
           </div>
         </div>
 
-        <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px 6px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
+        <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '10px 6px', borderRadius: '8px', border: '1px solid rgba(56, 189, 248, 0.12)' }}>
           <div style={{ fontSize: '11px', color: '#64748b' }}>Long Pauses</div>
           <div style={{ fontSize: '13px', fontWeight: '700', color: longPauses > 3 ? '#f59e0b' : '#38bdf8', marginTop: '2px' }}>
             {longPauses}
@@ -242,9 +240,8 @@ export default function WebcamMonitor({
         </div>
       </div>
 
-      {/* Communication Observation Note */}
       <p style={{ fontSize: '10px', color: '#64748b', marginTop: '10px', lineHeight: '1.3' }}>
-        * Visual & audio indicators measure speech pacing and presence for your post-interview report.
+        * Speech cadence, pauses, and gaze are factored into your post-interview report.
       </p>
     </div>
   );
