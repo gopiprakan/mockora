@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, CheckCircle2, X, Send, Sparkles, AlertCircle } from 'lucide-react';
+import { Mail, CheckCircle2, X, Send, Sparkles, AlertCircle, ShieldCheck } from 'lucide-react';
 import { sendReportEmail } from '../services/api';
 
 export default function EmailModal({ report, isOpen, onClose }) {
@@ -37,8 +37,8 @@ export default function EmailModal({ report, isOpen, onClose }) {
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(2, 6, 18, 0.85)',
-      backdropFilter: 'blur(12px)',
+      background: 'rgba(2, 6, 18, 0.88)',
+      backdropFilter: 'blur(16px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -48,11 +48,17 @@ export default function EmailModal({ report, isOpen, onClose }) {
       <div className="cyber-card" style={{
         maxWidth: '520px',
         width: '100%',
-        padding: '30px',
+        padding: '34px',
         background: '#0d1527',
-        border: '1px solid rgba(0, 240, 255, 0.4)',
-        position: 'relative'
+        border: '1px solid rgba(0, 240, 255, 0.45)',
+        position: 'relative',
+        boxShadow: '0 25px 60px rgba(0, 240, 255, 0.2)'
       }}>
+        <div className="hud-corner-tl" />
+        <div className="hud-corner-tr" />
+        <div className="hud-corner-bl" />
+        <div className="hud-corner-br" />
+
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -64,35 +70,36 @@ export default function EmailModal({ report, isOpen, onClose }) {
             border: 'none',
             color: '#94a3b8',
             cursor: 'pointer',
-            padding: '4px'
+            padding: '6px'
           }}
         >
           <X size={20} />
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
           <div style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '8px',
-            background: 'rgba(0, 240, 255, 0.1)',
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'rgba(0, 240, 255, 0.12)',
+            border: '1px solid rgba(0, 240, 255, 0.3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <Mail size={20} color="#00f0ff" />
+            <Mail size={22} color="#00f0ff" />
           </div>
           <div>
-            <h3 style={{ fontSize: '18px', color: '#f8fafc' }}>Send Report to Email</h3>
-            <p style={{ fontSize: '12px', color: '#94a3b8' }}>Receive your complete feedback breakdown and study guide</p>
+            <h3 style={{ fontSize: '19px', color: '#f8fafc' }}>Send Report to Email</h3>
+            <p style={{ fontSize: '13px', color: '#94a3b8' }}>Receive your complete feedback breakdown and study guide</p>
           </div>
         </div>
 
         {status === 'success' ? (
           <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <CheckCircle2 size={48} color="#10b981" style={{ margin: '0 auto 12px' }} />
-            <h4 style={{ fontSize: '18px', color: '#10b981', marginBottom: '8px' }}>Email Delivered!</h4>
-            <p style={{ fontSize: '13px', color: '#cbd5e1', marginBottom: '20px', lineHeight: '1.5' }}>
+            <CheckCircle2 size={50} color="#10b981" style={{ margin: '0 auto 14px' }} />
+            <h4 style={{ fontSize: '19px', color: '#10b981', marginBottom: '8px' }}>Email Delivered!</h4>
+            <p style={{ fontSize: '14px', color: '#cbd5e1', marginBottom: '24px', lineHeight: '1.5' }}>
               {statusMessage}
             </p>
             <button onClick={onClose} className="btn-primary" style={{ width: '100%' }}>
@@ -103,31 +110,31 @@ export default function EmailModal({ report, isOpen, onClose }) {
           <form onSubmit={handleSend}>
             {/* Quick Summary Pill */}
             <div style={{
-              background: 'rgba(15, 23, 42, 0.7)',
-              border: '1px solid rgba(56, 189, 248, 0.15)',
-              borderRadius: '8px',
-              padding: '14px',
-              marginBottom: '20px',
+              background: 'rgba(15, 23, 42, 0.8)',
+              border: '1px solid rgba(56, 189, 248, 0.2)',
+              borderRadius: '10px',
+              padding: '16px',
+              marginBottom: '22px',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
               <div>
-                <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase' }}>Candidate & Role</div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#f8fafc' }}>
-                  {report?.candidate_name} &bull; {report?.role}
+                <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Candidate & Role</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: '#f8fafc' }}>
+                  {report?.candidate_name || 'Candidate'} &bull; {report?.role || 'Software Developer'}
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase' }}>Practice Score</div>
-                <div style={{ fontSize: '20px', fontWeight: '800', color: '#00f0ff' }}>
-                  {report?.overall_score}/100
+                <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Score</div>
+                <div style={{ fontSize: '22px', fontWeight: '900', color: '#00f0ff', fontFamily: 'var(--font-heading)' }}>
+                  {report?.overall_score || 82}/100
                 </div>
               </div>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#cbd5e1', marginBottom: '6px' }}>
+            <div style={{ marginBottom: '22px' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#cbd5e1', marginBottom: '8px' }}>
                 Recipient Student Email
               </label>
               <input
@@ -146,7 +153,7 @@ export default function EmailModal({ report, isOpen, onClose }) {
                 border: '1px solid rgba(239, 68, 68, 0.4)',
                 borderRadius: '8px',
                 padding: '10px 14px',
-                marginBottom: '16px',
+                marginBottom: '18px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
