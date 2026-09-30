@@ -49,22 +49,22 @@ export default function CountdownTimer({
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
-        padding: '6px 14px',
-        borderRadius: '8px',
-        background: isUrgent ? 'rgba(239, 68, 68, 0.15)' : 'rgba(15, 23, 42, 0.8)',
-        border: `1px solid ${isUrgent ? '#ef4444' : 'rgba(56, 189, 248, 0.25)'}`,
+        padding: '7px 16px',
+        borderRadius: '999px',
+        background: isUrgent ? 'rgba(239, 68, 68, 0.15)' : 'rgba(15, 23, 42, 0.85)',
+        border: `1px solid ${isUrgent ? '#ef4444' : 'rgba(56, 189, 248, 0.3)'}`,
         color: isUrgent ? '#f87171' : '#38bdf8',
-        boxShadow: isUrgent ? '0 0 15px rgba(239, 68, 68, 0.3)' : 'none',
+        boxShadow: isUrgent ? '0 0 20px rgba(239, 68, 68, 0.35)' : '0 0 10px rgba(0, 240, 255, 0.15)',
         transition: 'all 0.3s ease'
       }}
     >
-      {isUrgent ? <AlertTriangle size={16} /> : <Clock size={16} />}
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', fontWeight: '700', letterSpacing: '0.04em' }}>
+      {isUrgent ? <AlertTriangle size={16} className="animate-pulse" /> : <Clock size={16} />}
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: '15px', fontWeight: '800', letterSpacing: '0.05em' }}>
         {formattedTime}
       </div>
       {isUrgent && (
-        <span style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: '700', color: '#f87171' }}>
-          Final 2 Min
+        <span style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: '800', color: '#f87171' }}>
+          2 Min Left
         </span>
       )}
     </div>
