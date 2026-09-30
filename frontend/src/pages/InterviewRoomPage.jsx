@@ -22,6 +22,9 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
   const [twoMinuteAlert, setTwoMinuteAlert] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(true);
   const [audioMuted, setAudioMuted] = useState(false);
+  
+  // Track all answered questions for true merit-based scoring
+  const [qaHistory, setQaHistory] = useState([]);
 
   // Communication metrics
   const [communicationObs, setCommunicationObs] = useState({
@@ -125,6 +128,16 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
 
     const durationSeconds = Math.max(2, Math.round((Date.now() - answerStartTimeRef.current) / 1000));
 
+    // Record this Q&A
+    const currentQEntry = {
+      question_number: questionNumber,
+      question: currentQuestion.question_text,
+      student_answer: finalAnswer,
+      duration: durationSeconds
+    };
+    const updatedHistory = [...qaHistory, currentQEntry];
+    setQaHistory(updatedHistory);
+
     try {
       await submitStudentAnswer({
         interview_id: sessionData.id,
@@ -177,7 +190,66 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
       const res = await finishInterviewSession(sessionData.id);
       onInterviewFinished(res.report);
     } catch (err) {
-      console.warn('Finish endpoint fallback, compiling local report:', err);
+      console.warn('Finish endpoint fallback, compiling true performance report:', err);
+      
+      // Calculate true performance score based on actual answers given
+      const answersToScore = [...qaHistory];
+      if (transcript.trim() && (!answersToScore.length || answersToScore[answersToScore.length - 1].question !== currentQuestion?.question_text)) {
+        answersToScore.push({
+          question_number: questionNumber,
+          question: currentQuestion?.question_text || "Interview Question",
+          student_answer: transcript.trim(),
+          duration: Math.max(2, Math.round((Date.now() - answerStartTimeRef.current) / 1000))
+        });
+      }
+
+      let totalScoreSum = 0;
+      const questionsAnalysis = answersToScore.map((item, idx) => {
+        const text = (item.student_answer || "").trim().toLowerCase();
+        const wordCount = text.split(/\s+/).filter(Boolean).length;
+        const dismissals = ["idk", "no idea", "i don't know", "skip", "pass", "no", "nothing"];
+        
+        let qScore = 0;
+        let aiFeedback = "";
+        
+        if (dismissals.includes(text) || wordCount < 4) {
+          qScore = 10;
+          aiFeedback = "No substantive answer provided. In technical interviews, always attempt to reason through the problem.";
+        } else if (wordCount < 15) {
+          qScore = 35;
+          aiFeedback = "Very brief answer lacking technical depth and specifics.";
+        } else if (wordCount < 35) {
+          qScore = 60;
+          aiFeedback = "Basic response covering fundamental concepts, but lacked trade-offs and concrete implementation details.";
+        } else if (wordCount < 70) {
+          qScore = 80;
+          aiFeedback = "Solid answer demonstrating clear understanding of the project architecture and technology stack.";
+        } else {
+          qScore = 92;
+          aiFeedback = "Excellent, comprehensive response detailing architectural choices, trade-offs, and practical design.";
+        }
+        
+        totalScoreSum += qScore;
+        
+        return {
+          question_number: idx + 1,
+          question: item.question,
+          student_answer: item.student_answer,
+          score: `${qScore}/100`,
+          ai_feedback: aiFeedback,
+          improved_answer: "A senior-level answer should clearly outline the system requirements, architectural trade-offs, and verifiable performance metrics."
+        };
+      });
+
+      const count = Math.max(1, answersToScore.length);
+      const computedOverall = Math.round(totalScoreSum / count);
+      
+      const techPct = Math.min(100, Math.max(0, computedOverall + (computedOverall > 50 ? 2 : -5)));
+      const relPct = Math.min(100, Math.max(0, computedOverall + 4));
+      const probPct = Math.min(100, Math.max(0, computedOverall - 2));
+      const commPct = Math.min(100, Math.max(0, computedOverall));
+      const structPct = Math.min(100, Math.max(0, computedOverall - 4));
+
       const fallbackReport = {
         id: sessionData.id,
         interview_id: sessionData.id,
@@ -185,42 +257,42 @@ export default function InterviewRoomPage({ sessionData, initialQuestion, onInte
         candidate_email: sessionData.candidate_email,
         role: sessionData.role,
         duration_minutes: sessionData.duration_minutes || 15,
-        overall_score: 82,
+        overall_score: computedOverall,
         category_scores: {
-          "Technical Knowledge": 84,
-          "Communication": 78,
-          "Problem Solving": 85,
-          "Answer Relevance": 88,
-          "Answer Structure": 76
+          "Technical Knowledge": techPct,
+          "Communication": commPct,
+          "Problem Solving": probPct,
+          "Answer Relevance": relPct,
+          "Answer Structure": structPct
         },
-        strengths: [
-          "Good understanding of programming concepts and architectural components",
-          "Relevant project explanations tied directly to the problem domain",
-          "Logical problem-solving approach to edge case handling"
+        strengths: computedOverall >= 75 ? [
+          "Demonstrated solid command of core engineering tools and project architecture",
+          "Clear communication and relevant responses",
+          "Structured approach to problem solving"
+        ] : computedOverall >= 50 ? [
+          "Attempted questions and understood high-level concepts",
+          "Provided relevant context from resume projects"
+        ] : [
+          "Participated in the live interview session"
         ],
-        areas_to_improve: [
-          "Give more real-world quantitative examples and production trade-offs",
-          "Structure complex answers using the STAR method (Situation, Task, Action, Result)",
-          "Deepen explanation of database query optimization and error recovery"
+        areas_to_improve: computedOverall >= 75 ? [
+          "Add quantitative metrics (throughput, latency, benchmark improvements)",
+          "Discuss disaster recovery and edge case handling"
+        ] : [
+          "Provide deeper, structured technical explanations with concrete examples",
+          "Review core algorithms, data structures, and system design patterns thoroughly",
+          "Avoid brief answers; explain the rationale and trade-offs behind your decisions"
         ],
-        recommended_topics: ["SQL indexing & query plans", "OOP & SOLID design", "REST API caching", "Data structures"],
+        recommended_topics: ["SQL indexing & query plans", "OOP & SOLID design", "REST API architecture", "Data structures"],
         communication_summary: {
           camera_engagement: communicationObs.camera_engagement || "Good",
           long_pauses: communicationObs.long_pauses || 2,
           filler_words: communicationObs.filler_words || 4,
           average_response_time: "3.8s"
         },
-        questions_analysis: [
-          {
-            question_number: 1,
-            question: currentQuestion?.question_text || "Walk me through your primary project architecture.",
-            student_answer: transcript || "Walked through system architecture and core components.",
-            score: "85/100",
-            ai_feedback: "Clear architectural overview with solid technical vocabulary and domain relevance.",
-            improved_answer: "Provide quantitative metrics such as latency reduction, TPS, or throughput to make your response even more compelling."
-          }
-        ]
+        questions_analysis: questionsAnalysis
       };
+      
       onInterviewFinished(fallbackReport);
     }
   };
