@@ -1,5 +1,7 @@
-import asyncio
-from backend.app.services.ai_service import analyze_resume_ai, generate_adaptive_question, evaluate_answer
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from app.services.ai_service import analyze_resume_ai, generate_adaptive_question, evaluate_answer
 
 sample_resume = """
 Gopiprakan R
